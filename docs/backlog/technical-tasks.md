@@ -140,17 +140,21 @@ without introducing a second application or test stack.
 - [x] [VAR-G00-T03-AC1] Each package can be mounted or exercised with the
   approved stubs, stable hooks and package-scoped checks while every other
   feature implementation is absent.
-- [ ] [VAR-G00-T03-AC2] Baseline checks pass in two isolated clean checkouts;
+- [x] [VAR-G00-T03-AC2] Baseline checks pass in two isolated clean checkouts;
   the CI definition invokes the same model-free checks without provider secrets,
   and any unexecuted remote workflow is explicitly reported as not run.
 
 **Local evidence (2026-10-22):** [T03 checks and limits](../../README.md#t03-local-evidence-and-remaining-gate-2026-10-22).
 All eight baseline package selectors, the shared injectable harness, common
 hooks and model-free browser/regression checks passed while real features were
-absent. The CI definition is saved but has not run remotely. The user subsequently
-authorised a local baseline commit, two sequential clean-checkout runs and an
-evidence/status commit on 2026-10-22. AC2 stays unchecked until those checks pass.
-This does not close G00 or authorise feature dispatch, pushing or remote CI.
+absent. The CI definition is saved but has not run remotely. After the user's
+separate authorisation, two sequential clean clones of
+`e7b8d138d58228521ae95f5dfb68fd2599b95107` passed locked restore, contract drift,
+lint/type checks, 114 C# + 108 Vitest + 22 Chromium tests, builds and publish;
+each also passed all 30 dispatcher fixture tests and retained clean Git state.
+See the [clean-checkout completion record](../../README.md#t03-clean-checkout-completion-2026-10-22).
+Both T03 criteria are supported. This does not close G00 or authorise feature
+dispatch, pushing, remote CI or a real application-model request.
 
 ## Synthetic content
 

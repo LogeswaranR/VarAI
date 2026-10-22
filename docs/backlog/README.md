@@ -9,8 +9,10 @@ the T01 scaffold. Revision 0.4 records the separately approved
 The original product scope is unchanged; the former REST transport is replaced,
 not maintained in parallel. T03 harness/CI work was separately authorised on
 2026-10-22. After an initial deferral, the user approved local baseline/evidence
-commits and two clean-checkout runs. G00 remains subject to the recorded
-acceptance evidence and separate sign-off.
+commits and two clean-checkout runs. Both runs passed against
+`e7b8d138d58228521ae95f5dfb68fd2599b95107`; see the
+[completion record](../../README.md#t03-clean-checkout-completion-2026-10-22).
+G00 remains subject to the recorded acceptance evidence and separate sign-off.
 
 This is a product backlog, not an implementation or a claim that the prototype
 works. The user selected an offside-related goal review and repository-only
@@ -610,7 +612,7 @@ re-importing this ID-free creation CSV would create duplicates.
 | Tooling and version pins | T01/T02 tooling plus Playwright 1.64.1 and SHA-pinned GitHub Actions configuration; [local checks and limitations recorded](../../README.md#t03-local-evidence-and-remaining-gate-2026-10-22) | Product/integration owner, G00 |
 | Shared contract and layout | GraphQL v0.2 replaces the proposed REST transport; C# schema, generated TypeScript operation types and mapped package ownership; domain behavior retained | Approved, 2026-10-21 |
 | Implementation permission | T01/T02, T03's local harness/CI and local baseline/evidence commits authorised; no feature package, worker dispatch, push or remote CI authorised | Product owner, G00 |
-| Clean-checkout verification | Two sequential isolated checkouts of the explicitly approved local baseline commit authorised; results pending | Integration owner, G00/T03 |
+| Clean-checkout verification | Both isolated clones passed at `e7b8d138d58228521ae95f5dfb68fd2599b95107`; source remained clean; remote CI not run | Verified T03 evidence, 2026-10-22 |
 | Applicable law edition | IFAB 2026/27 approved; publication confirmed in the [official library](https://www.theifab.com/laws-of-the-game-documents/); scenario-specific source checks remain required | Edition approved, 2026-10-21; content owner, G00 |
 | Legal/content authority | Illustrative prototype, not official adjudication; scenario content remains draft and expert review has not been performed | Content owner, G00/G01 |
 | Azure provider/model access | Not verified from this environment | Project owner, G01 |

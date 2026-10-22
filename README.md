@@ -340,7 +340,7 @@ separate mechanism and remains disabled.
 | `npm run publish` and bounded HTTP smoke check | Passed; production health/shell unchanged, harness paths returned 404, no harness HTML/fixture text or stub/export assembly was shipped |
 | CI YAML checks | Syntax, three pinned action SHAs, read-only permissions and existing model-free command references checked with the available Ruby YAML parser |
 | `npm audit` / `npm install-scripts ls` | Zero reported npm vulnerabilities; no unreviewed scripts reported; not a complete security assessment |
-| Two isolated clean checkouts | Initially deferred; local baseline commit and two sequential clean-checkout runs now authorised on 2026-10-22; results pending |
+| Two isolated clean checkouts | Completed after separate authorisation; both verified baseline `e7b8d138d58228521ae95f5dfb68fd2599b95107`; see the completion record below |
 | Remote GitHub Actions / Linux browser dependency installation | **Not run** |
 
 The initial browser attempt identified the missing Chromium binary; it was
@@ -362,12 +362,62 @@ workspace commit, remote workflow run, worker dispatch or cloud resource was
 created. These results are from this working checkout, **not** a substitute for
 the required clean-checkout evidence or full product/accessibility acceptance.
 
-**T03 verification has resumed; it is not Done yet.** The user separately
-authorised a local baseline commit on `main`, two isolated clean-checkout runs
-and an evidence/status commit on 2026-10-22. The isolated-harness criterion is
-supported; the clean-checkout criterion awaits those results. G00 sign-off,
-dispatch, pushing and remote CI remain separate approvals; see the
+**T03 is complete following the two clean-checkout runs below.** The user
+separately authorised the local baseline and evidence commits on 2026-10-22.
+G00 sign-off, dispatch, pushing and remote CI remain separate approvals; see the
 [canonical board](./docs/backlog/board.md).
+
+## T03 clean-checkout completion (2026-10-22)
+
+Verified baseline: **`e7b8d138d58228521ae95f5dfb68fd2599b95107`**
+(`Establish VarAI development baseline through T03`).
+This local commit captures the approved application, tests, configuration,
+planning and guardrails. Before it was created, four scaffold files were
+normalized to the repository's LF line endings without changing configuration values.
+Ignored tools, dependencies, build outputs and secret-bearing local files were
+excluded.
+
+Two local clones, A and B, were created using local `git clone` with
+`--no-hardlinks --no-checkout` and checked out detached at that exact revision. They ran
+sequentially on the same macOS ARM64 host. Both started with clean Git state
+and no dependency directories, caches or build outputs.
+
+Each clone had independent Git storage, `node_modules`, an npm cache, a NuGet
+package store, `.NET` CLI home, compiler outputs and publish output. Shared
+installed prerequisites were the already-pinned
+.NET SDK `10.0.402`, Node.js `24.22.1` / npm `11.19.1` executables and
+Playwright `1.64.1` Chromium binaries were shared as installed prerequisites.
+This is two clean source/dependency environments, not two operating systems,
+a claim of empty host/HTTP caches, or evidence of Linux/remote-CI execution.
+
+| Check executed in each clone | Checkout A | Checkout B |
+| --- | --- | --- |
+| Revision and clean-start assertions | Exact baseline; clean | Exact baseline; clean |
+| Initial `npm run contracts:check` before restore | Expected `NETSDK1004`: restore assets absent | Expected `NETSDK1004`: restore assets absent |
+| `npm run restore` | Locked .NET restore and `npm ci` passed | Locked .NET restore and `npm ci` passed |
+| `npm run verify` | Drift/lint/types/builds passed; 114 C# + 108 Vitest + 22 Chromium tests passed | Drift/lint/types/builds passed; 114 C# + 108 Vitest + 22 Chromium tests passed |
+| `npm run publish` | Passed; harness HTML and stub assembly excluded | Passed; harness HTML and stub assembly excluded |
+| `python3 -B -m unittest discover -s scripts/tests -p 'test_board_dispatch.py'` | All 30 fixture tests passed | All 30 fixture tests passed |
+| Final revision / `git status --porcelain` | Same baseline; empty status | Same baseline; empty status |
+| Temporary harness server | Stopped | Stopped |
+
+The preflight failures establish that neither checkout reused restored assets;
+they were expected setup failures, not ignored verification failures. All
+required commands subsequently passed. Generated dependencies/outputs remain
+ignored and did not modify committed source. No fixes to application code were
+needed during either run. The follow-up completion commit changes documentation
+and status only; executable-source evidence refers to the exact baseline above.
+The two Git-clean source checkouts and command logs are retained in the local
+session workspace. Their generated dependency/cache/build directories were
+removed after verification; the original workspace's installed tools were not
+removed.
+
+Both T03 acceptance criteria are now supported. Remote GitHub Actions and Linux
+browser-dependency installation remain **not run**, as permitted by the
+criterion requiring that limitation to be explicit. No push, live-model call,
+cloud provisioning, feature work, worker dispatch or scheduler activation was
+performed. G00's final review and the approved-dispatch-baseline control remain
+pending rather than being silently approved by these checks.
 
 ## Prototype planning
 

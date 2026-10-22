@@ -11,10 +11,10 @@ Inventory: **1 Epic, 10 Issues and 22 technical Tasks**. This tracks the existin
 offside prototype scope. The Cosmos DB and saved-history proposal has not been
 added to it. No prototype implementation is marked complete by creating this board.
 
-**Next milestone:** finish T03's two-clean-checkout verification. On 2026-10-22
-the user separately authorised a local baseline commit on `main`, two sequential
-isolated checkouts of that revision, and a subsequent evidence/status commit.
-Results are pending; this does not approve G00 sign-off, pushing or dispatch.
+**Next milestone:** final G00 review/sign-off, including package ownership and
+selection of the approved dispatch baseline. T01, T02 and T03 have verification
+evidence; T03's two clean-checkout runs passed. Completion of these technical
+Tasks does not approve G00 sign-off, pushing, scheduling or worker dispatch.
 
 **Delivery approach approved:** follow the [board-driven workflow](./delivery-workflow.md)
 with two GPT-6 Astra development slots, two GPT-6.1 Sol QA slots and user
@@ -39,12 +39,13 @@ These approve a direction and baseline plan, not a completed development gate.
 | Baseline scope | Shared scaffold, executable contracts, labelled deterministic stubs, isolated harness and model-free checks in two clean checkouts; no feature implementation |
 | Product/content approval owner | User |
 | G00 integration owner | Copilot in this session; no agent dispatch for this step |
-| Current authorisation | T01/T02 and local T03 checks completed; user now authorises a baseline commit on `main`, two sequential isolated clean checkouts and an evidence/status commit; no push, remote CI, feature implementation or dispatch |
+| Current authorisation | T03 closure authorised through a local baseline commit, two clean-checkout runs and an evidence/status commit; no push, remote CI, feature implementation or dispatch |
 | Scaffold tooling/layout | ASP.NET Core in `server/`, React/TypeScript + Vite in `client/`; Node.js 24 LTS/npm, MSTest, Vitest, Testing Library and ESLint approved; [pins and checks recorded](../../README.md#local-scaffold) |
 | Shared-contract mapping | T02 uses C# contracts/schema under `server/Contracts/`, generated TypeScript under `client/src/contracts/`, and shared deterministic stubs under `tests/contract-stubs/`; no HTTP endpoint or UI wiring |
 | Reference-only follow-up | User approved pointing the paused dispatcher, its fixture tests and handoff skill link to v0.2; all 30 existing fixture tests passed, without enabling scheduling or dispatch |
 | T03 local implementation | Typed feature harness, 23 UI hooks, eight package selectors, Playwright Chromium checks and a SHA-pinned model-free GitHub Actions definition are saved and locally checked; remote CI not run |
-| T03 clean-checkout gate | Earlier deferral superseded by explicit local baseline/evidence commit approval on 2026-10-22; validate the exact baseline revision before checking AC2 |
+| T03 clean-checkout gate | Completed after explicit approval on 2026-10-22; two independent clean clones passed against `e7b8d138d58228521ae95f5dfb68fd2599b95107` |
+| Verified T03 revision | `e7b8d138d58228521ae95f5dfb68fd2599b95107`; a verified code baseline, not automatic approval of the dispatcher control below |
 | Separate permissions | Only the approved local commits and verification checkouts are authorised; no push, cloud provisioning, live-model calls, Azure DevOps/PAT access or persistence/storage additions |
 
 Read-only tooling checks on 2026-10-21 found .NET SDK `10.0.400`, Node.js
@@ -75,9 +76,14 @@ wiring and live-model access are not implemented.
 records all eight package selectors passing, 114 C# tests, 108 Vitest tests,
 22 Chromium checks at 375px/1280px, lint/types/builds, local CI syntax checks and
 production-harness isolation. The initial browser/install failures and successful
-rechecks are recorded there. Two isolated clean checkouts have now been
-authorised but have not yet run; remote CI remains not run. No scheduler,
-dispatch control, approved-dispatch-baseline value or human batch gate changed.
+rechecks are recorded there. The subsequent
+[clean-checkout completion record](../../README.md#t03-clean-checkout-completion-2026-10-22)
+confirms that both independent clones passed locked restore, all baseline
+checks, local publication and all 30 dispatcher fixture tests. Each retained
+clean Git state at the same baseline revision, with independent dependency
+directories/build outputs and stopped test servers. Remote CI remains not run.
+No scheduler, dispatch control, approved-dispatch-baseline value or human batch
+gate changed.
 
 ## Automation controls
 
@@ -102,7 +108,7 @@ There have been no scheduled runs or real worker assignments from this setup.
 | ID | Work item | Kind | Status | Owner | Notes |
 | --- | --- | --- | --- | --- | --- |
 | VAR-E01 | [Understand a synthetic offside goal review](./README.md#epic-var-e01-understand-a-synthetic-offside-goal-review) | Epic | To Do | Unassigned | - |
-| VAR-G00 | [Approve the shared development baseline](./README.md#var-g00-approve-the-shared-development-baseline) | Gate | Doing | Copilot (this session) | T01/T02 verified; T03 local checks passed, but baseline approval, two clean checkouts and remaining gate sign-off are outstanding |
+| VAR-G00 | [Approve the shared development baseline](./README.md#var-g00-approve-the-shared-development-baseline) | Gate | Doing | Copilot (this session) | T01/T02/T03 verified; final gate review, package ownership and approved dispatch-baseline selection remain outstanding |
 | VAR-101 | [Create the synthetic review library](./README.md#var-101-create-the-synthetic-review-library) | Package | To Do | Unassigned | - |
 | VAR-102 | [Build the review-room replay](./README.md#var-102-build-the-review-room-replay) | Package | To Do | Unassigned | - |
 | VAR-103 | [Visualise the supplied offside scene](./README.md#var-103-visualise-the-supplied-offside-scene) | Package | To Do | Unassigned | - |
@@ -122,7 +128,7 @@ An inherited owner is unassigned while the parent remains unassigned.
 | --- | --- | --- | --- | --- | --- |
 | VAR-G00-T01 | VAR-G00 | [Scaffold the approved application and tooling](./technical-tasks.md#var-g00-t01-scaffold-the-approved-application-and-tooling) | Done | Inherit parent | [Verification evidence](../../README.md#t01-verification-2026-10-21); both criteria passed; no feature package or complete G00 claim |
 | VAR-G00-T02 | VAR-G00 | [Implement shared contracts and deterministic stubs](./technical-tasks.md#var-g00-t02-implement-shared-contracts-and-deterministic-stubs) | Done | Inherit parent | [GraphQL v0.2 evidence](../../README.md#t02-verification-2026-10-21); both criteria passed; no HTTP/live-provider or feature-completion claim |
-| VAR-G00-T03 | VAR-G00 | [Provide an isolated feature harness and CI checks](./technical-tasks.md#var-g00-t03-provide-an-isolated-feature-harness-and-ci-checks) | Doing | Inherit parent | [Local evidence](../../README.md#t03-local-evidence-and-remaining-gate-2026-10-22); local baseline commit and two clean checkouts now authorised; AC2 verification pending; remote CI not run |
+| VAR-G00-T03 | VAR-G00 | [Provide an isolated feature harness and CI checks](./technical-tasks.md#var-g00-t03-provide-an-isolated-feature-harness-and-ci-checks) | Done | Inherit parent | [Completion evidence](../../README.md#t03-clean-checkout-completion-2026-10-22); both criteria passed on two clean clones of `e7b8d13`; remote CI not run; no G00/dispatch approval implied |
 | VAR-101-T01 | VAR-101 | [Author versioned scenario and source records](./technical-tasks.md#var-101-t01-author-versioned-scenario-and-source-records) | To Do | Inherit parent | - |
 | VAR-101-T02 | VAR-101 | [Implement the scenario repository and integrity checks](./technical-tasks.md#var-101-t02-implement-the-scenario-repository-and-integrity-checks) | To Do | Inherit parent | - |
 | VAR-102-T01 | VAR-102 | [Implement deterministic replay state](./technical-tasks.md#var-102-t01-implement-deterministic-replay-state) | To Do | Inherit parent | - |
