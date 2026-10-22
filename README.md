@@ -416,8 +416,44 @@ Both T03 acceptance criteria are now supported. Remote GitHub Actions and Linux
 browser-dependency installation remain **not run**, as permitted by the
 criterion requiring that limitation to be explicit. No push, live-model call,
 cloud provisioning, feature work, worker dispatch or scheduler activation was
-performed. G00's final review and the approved-dispatch-baseline control remain
-pending rather than being silently approved by these checks.
+performed. At the end of T03, G00's final review and approved-dispatch-baseline
+control remained pending rather than being silently approved by those checks.
+The subsequent explicit G00 approval is recorded below.
+
+## G00 sign-off (2026-10-22)
+
+The user approved the shared development baseline, existing scope, .NET/React
+stack, GraphQL v0.2 contract, package boundaries and accountability model.
+The approved common revision is **`a7d9f82983f4fc35c5a4703dfd69ffde79554240`**.
+It differs from twice-verified `e7b8d13` only in documentation/status, not
+executable source, dependencies or configuration.
+
+The user retains product/content approval. The Copilot coordinator is accountable
+for integration, VAR-101 through VAR-108 and G01. This is accountability, not
+an invented developer/QA identity or an active worker assignment. Actual claims
+and worker attachment require a separate approved dispatch step.
+
+The [canonical board](./docs/backlog/board.md#g00-sign-off-2026-10-22) records
+G00 as Done and maps its four criteria to approval/evidence. All feature packages
+remain To Do; Dispatch remains Paused; no native schedule, worker or feature
+implementation was started. The approved commit's board is a historical
+snapshot: future workers must receive current coordinator gate/claim context
+alongside the common baseline, following the existing handoff procedure.
+
+This is a documentation-only gate record, so the application suites were not
+rerun. The underlying baseline evidence remains the two recorded clean-checkout
+runs. The read-only `python3 -B scripts/board_dispatch.py scan` accepted the
+closed gate and approved revision, reported only `Board dispatch is paused.`,
+and returned no eligible work or claims. Structural checks confirmed 33 work
+items, 98 acceptance criteria, the 10 completed G00/T01/T02/T03 criteria,
+accountable ownership and valid local links. Available slot counts are not
+proof of worker/model runtime availability.
+
+Remote CI/Linux execution, worker-runtime availability, expert content
+review, live-model access/spending and full product/learning acceptance remain
+unverified or unapproved. G00 sign-off does not turn the prototype into an AI
+referee or authorise cloud services, persistence/storage additions or Azure
+Boards/PAT access.
 
 ## Prototype planning
 

@@ -12,7 +12,10 @@ not maintained in parallel. T03 harness/CI work was separately authorised on
 commits and two clean-checkout runs. Both runs passed against
 `e7b8d138d58228521ae95f5dfb68fd2599b95107`; see the
 [completion record](../../README.md#t03-clean-checkout-completion-2026-10-22).
-G00 remains subject to the recorded acceptance evidence and separate sign-off.
+The user separately signed off G00 on 2026-10-22 using shared revision
+`a7d9f82983f4fc35c5a4703dfd69ffde79554240`, whose executable code is unchanged
+from that tested revision. Feature work and dispatch still need separate
+approval; see the [gate record](./board.md#g00-sign-off-2026-10-22).
 
 This is a product backlog, not an implementation or a claim that the prototype
 works. The user selected an offside-related goal review and repository-only
@@ -212,17 +215,27 @@ lockfiles, root configuration, shared contracts, common stubs and CI setup.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-G00-AC1] The product owner approves the scope, technical stack,
+- [x] [VAR-G00-AC1] The product owner approves the scope, technical stack,
   contract version and proposed package boundaries; unresolved decisions are recorded.
-- [ ] [VAR-G00-AC2] A runnable baseline contains shared types, all three
+- [x] [VAR-G00-AC2] A runnable baseline contains shared types, all three
   illustrative scenario stubs, success/error response stubs and documented test,
   type-check and build commands that actually pass.
-- [ ] [VAR-G00-AC3] Package ownership, the applicable rule edition and content
+- [x] [VAR-G00-AC3] Package ownership, the applicable rule edition and content
   review status are recorded; model access and spending remain unapproved unless
   separately authorised.
-- [ ] [VAR-G00-AC4] Two isolated checkouts can run the baseline checks without
+- [x] [VAR-G00-AC4] Two isolated checkouts can run the baseline checks without
   a feature implementation or live model; all agents receive the same baseline
   revision before dispatch.
+
+**Sign-off evidence (2026-10-22):** the user approved the scope/stack/contract,
+shared revision and coordinator accountability. The
+[board's gate record](./board.md#g00-sign-off-2026-10-22) maps each criterion to
+the T01/T02/T03 evidence and records remaining limitations. Approved
+`a7d9f82` differs from twice-verified `e7b8d13` only in documentation/status.
+Every future worker claim/handoff must identify the full approved revision;
+no real worker has been dispatched or claimed merely to satisfy this gate.
+G00 completion is not feature acceptance, live-model approval or permission
+to start automation.
 
 **Dependencies:** none of the parallel packages. Requires product decisions.
 
@@ -611,7 +624,9 @@ re-importing this ID-free creation CSV would create duplicates.
 | Framework | ASP.NET Core/C# on .NET 10 LTS with React/TypeScript; one deployable application | Direction approved, 2026-10-21 |
 | Tooling and version pins | T01/T02 tooling plus Playwright 1.64.1 and SHA-pinned GitHub Actions configuration; [local checks and limitations recorded](../../README.md#t03-local-evidence-and-remaining-gate-2026-10-22) | Product/integration owner, G00 |
 | Shared contract and layout | GraphQL v0.2 replaces the proposed REST transport; C# schema, generated TypeScript operation types and mapped package ownership; domain behavior retained | Approved, 2026-10-21 |
-| Implementation permission | T01/T02, T03's local harness/CI and local baseline/evidence commits authorised; no feature package, worker dispatch, push or remote CI authorised | Product owner, G00 |
+| G00 sign-off / shared baseline | User approved `a7d9f82983f4fc35c5a4703dfd69ffde79554240` and the recorded gate evidence/limitations | Approved, 2026-10-22 |
+| Package accountability | Copilot coordinator accountable for VAR-101 through VAR-108 and G01; actual workers assigned only through separately authorised claims | Approved, 2026-10-22; live assignments only in board |
+| Implementation permission | Baseline work and the local G00 approval-record commit authorised; no feature package, worker dispatch, scheduling activation, push or remote CI authorised | Product owner, separate next approval |
 | Clean-checkout verification | Both isolated clones passed at `e7b8d138d58228521ae95f5dfb68fd2599b95107`; source remained clean; remote CI not run | Verified T03 evidence, 2026-10-22 |
 | Applicable law edition | IFAB 2026/27 approved; publication confirmed in the [official library](https://www.theifab.com/laws-of-the-game-documents/); scenario-specific source checks remain required | Edition approved, 2026-10-21; content owner, G00 |
 | Legal/content authority | Illustrative prototype, not official adjudication; scenario content remains draft and expert review has not been performed | Content owner, G00/G01 |

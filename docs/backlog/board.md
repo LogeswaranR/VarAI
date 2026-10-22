@@ -11,10 +11,11 @@ Inventory: **1 Epic, 10 Issues and 22 technical Tasks**. This tracks the existin
 offside prototype scope. The Cosmos DB and saved-history proposal has not been
 added to it. No prototype implementation is marked complete by creating this board.
 
-**Next milestone:** final G00 review/sign-off, including package ownership and
-selection of the approved dispatch baseline. T01, T02 and T03 have verification
-evidence; T03's two clean-checkout runs passed. Completion of these technical
-Tasks does not approve G00 sign-off, pushing, scheduling or worker dispatch.
+**Next decision:** separately authorise how to start Batch 1 (VAR-101, VAR-102,
+VAR-105 and VAR-108). G00 was signed off by the user on 2026-10-22 with shared
+baseline `a7d9f82983f4fc35c5a4703dfd69ffde79554240`. All feature packages remain
+To Do and Dispatch remains Paused; no worker launch, queueing, scheduling or push
+is authorised by this gate approval.
 
 **Delivery approach approved:** follow the [board-driven workflow](./delivery-workflow.md)
 with two GPT-6 Astra development slots, two GPT-6.1 Sol QA slots and user
@@ -27,8 +28,10 @@ to update this board.
 
 ## G00 decisions and readiness
 
-Decisions recorded on 2026-10-21 from the user's approvals in this session.
-These approve a direction and baseline plan, not a completed development gate.
+Initial decisions were recorded on 2026-10-21. The user separately approved
+G00 sign-off, the shared baseline and accountable ownership on 2026-10-22,
+following the recorded T01/T02/T03 evidence. This is baseline approval, not
+acceptance of a completed review prototype.
 
 | Decision | Recorded position |
 | --- | --- |
@@ -39,14 +42,16 @@ These approve a direction and baseline plan, not a completed development gate.
 | Baseline scope | Shared scaffold, executable contracts, labelled deterministic stubs, isolated harness and model-free checks in two clean checkouts; no feature implementation |
 | Product/content approval owner | User |
 | G00 integration owner | Copilot in this session; no agent dispatch for this step |
-| Current authorisation | T03 closure authorised through a local baseline commit, two clean-checkout runs and an evidence/status commit; no push, remote CI, feature implementation or dispatch |
+| Current authorisation | G00 sign-off and a local approval-record commit authorised on 2026-10-22; no push, remote CI, feature implementation, queueing or dispatch |
 | Scaffold tooling/layout | ASP.NET Core in `server/`, React/TypeScript + Vite in `client/`; Node.js 24 LTS/npm, MSTest, Vitest, Testing Library and ESLint approved; [pins and checks recorded](../../README.md#local-scaffold) |
 | Shared-contract mapping | T02 uses C# contracts/schema under `server/Contracts/`, generated TypeScript under `client/src/contracts/`, and shared deterministic stubs under `tests/contract-stubs/`; no HTTP endpoint or UI wiring |
 | Reference-only follow-up | User approved pointing the paused dispatcher, its fixture tests and handoff skill link to v0.2; all 30 existing fixture tests passed, without enabling scheduling or dispatch |
 | T03 local implementation | Typed feature harness, 23 UI hooks, eight package selectors, Playwright Chromium checks and a SHA-pinned model-free GitHub Actions definition are saved and locally checked; remote CI not run |
 | T03 clean-checkout gate | Completed after explicit approval on 2026-10-22; two independent clean clones passed against `e7b8d138d58228521ae95f5dfb68fd2599b95107` |
 | Verified T03 revision | `e7b8d138d58228521ae95f5dfb68fd2599b95107`; a verified code baseline, not automatic approval of the dispatcher control below |
-| Separate permissions | Only the approved local commits and verification checkouts are authorised; no push, cloud provisioning, live-model calls, Azure DevOps/PAT access or persistence/storage additions |
+| G00 shared revision | User approved `a7d9f82983f4fc35c5a4703dfd69ffde79554240`; executable source matches the twice-verified T03 revision, with only documentation/status differences |
+| Package accountability | Copilot coordinator is accountable for VAR-101 through VAR-108 and G01; actual developer/QA identities are recorded only through separately authorised claims and attachment |
+| Separate permissions | Only the explicitly approved baseline/evidence/gate-record commits and verification checkouts are authorised; no push, cloud provisioning, live-model calls, Azure DevOps/PAT access or persistence/storage additions |
 
 Read-only tooling checks on 2026-10-21 found .NET SDK `10.0.400`, Node.js
 `25.5.0` and npm `11.8.0`. These are observed local versions, not approved
@@ -82,8 +87,35 @@ confirms that both independent clones passed locked restore, all baseline
 checks, local publication and all 30 dispatcher fixture tests. Each retained
 clean Git state at the same baseline revision, with independent dependency
 directories/build outputs and stopped test servers. Remote CI remains not run.
-No scheduler, dispatch control, approved-dispatch-baseline value or human batch
-gate changed.
+That T03 verification did not change scheduling, dispatch or human batch gates.
+The subsequent G00 sign-off below explicitly approves the shared-baseline value;
+Dispatch and the batch sign-off gate remain unchanged.
+
+### G00 sign-off (2026-10-22)
+
+| Criterion | Evidence / approval |
+| --- | --- |
+| VAR-G00-AC1 | User approved the existing scope, .NET/React tooling, GraphQL v0.2 and package boundaries, with unresolved capabilities/permissions retained below |
+| VAR-G00-AC2 | T01/T02/T03 provide the runnable scaffold, shared validation, S1/S2/S3 and response/error stubs, harness and passing repository commands |
+| VAR-G00-AC3 | User retains product/content approval; coordinator accountability is recorded for all packages and G01; IFAB 2026/27 and draft content status remain explicit; live-model access/spending remain unapproved |
+| VAR-G00-AC4 | Two clean clones passed at `e7b8d13`; approved revision `a7d9f82` has identical executable source. Every future claim/handoff must use the full approved revision before worker attachment |
+
+The accountable owner is not a claim that a feature worker is running. For
+To Do packages, the Owner column records coordinator accountability. The
+existing helper replaces that operational owner with a claim identifier when
+an authorised worker is reserved/attached; accountability remains with the
+coordinator. No claim or runtime worker identity has been created for this gate.
+
+The approved baseline's checked-in board is a historical snapshot. The current
+canonical coordinating checkout remains the status authority, as described in
+the [claim-helper workflow](./delivery-workflow.md#claim-helper-and-local-checks).
+Future handoffs must include the approved revision and current gate/claim
+context, not infer live status from an older worker copy.
+
+Still unverified or unapproved: remote CI/Linux execution, actual development/QA
+worker invocation, source-interpretation/expert review, application live-model
+access/spending, full product acceptance and the learning study. These are not
+converted into success claims by closing G00.
 
 ## Automation controls
 
@@ -96,7 +128,7 @@ open the gate. Queue only approved parent packages, never G00/T02/T03.
 | --- | --- |
 | Dispatch | Paused |
 | Active batch | 1 |
-| Approved baseline | Pending |
+| Approved baseline | a7d9f82983f4fc35c5a4703dfd69ffde79554240 |
 | Batch 1 sign-off | Pending |
 
 The native hourly definition is saved disabled; its identifier and read-back
@@ -107,17 +139,17 @@ There have been no scheduled runs or real worker assignments from this setup.
 
 | ID | Work item | Kind | Status | Owner | Notes |
 | --- | --- | --- | --- | --- | --- |
-| VAR-E01 | [Understand a synthetic offside goal review](./README.md#epic-var-e01-understand-a-synthetic-offside-goal-review) | Epic | To Do | Unassigned | - |
-| VAR-G00 | [Approve the shared development baseline](./README.md#var-g00-approve-the-shared-development-baseline) | Gate | Doing | Copilot (this session) | T01/T02/T03 verified; final gate review, package ownership and approved dispatch-baseline selection remain outstanding |
-| VAR-101 | [Create the synthetic review library](./README.md#var-101-create-the-synthetic-review-library) | Package | To Do | Unassigned | - |
-| VAR-102 | [Build the review-room replay](./README.md#var-102-build-the-review-room-replay) | Package | To Do | Unassigned | - |
-| VAR-103 | [Visualise the supplied offside scene](./README.md#var-103-visualise-the-supplied-offside-scene) | Package | To Do | Unassigned | - |
-| VAR-104 | [Explore evidence and rule references](./README.md#var-104-explore-evidence-and-rule-references) | Package | To Do | Unassigned | - |
-| VAR-105 | [Provide bounded evidence-linked explanations](./README.md#var-105-provide-bounded-evidence-linked-explanations) | Package | To Do | Unassigned | - |
-| VAR-106 | [Read personalised explanations and recaps](./README.md#var-106-read-personalised-explanations-and-recaps) | Package | To Do | Unassigned | - |
-| VAR-107 | [Compare one controlled fact](./README.md#var-107-compare-one-controlled-fact) | Package | To Do | Unassigned | - |
-| VAR-108 | [Prepare acceptance and learning evaluation](./README.md#var-108-prepare-acceptance-and-learning-evaluation) | Package | To Do | Unassigned | - |
-| VAR-G01 | [Integrate and verify the prototype](./README.md#var-g01-integrate-and-verify-the-prototype) | Gate | To Do | Unassigned | - |
+| VAR-E01 | [Understand a synthetic offside goal review](./README.md#epic-var-e01-understand-a-synthetic-offside-goal-review) | Epic | To Do | User (product) | Product/content approval; no completed product claim |
+| VAR-G00 | [Approve the shared development baseline](./README.md#var-g00-approve-the-shared-development-baseline) | Gate | Done | Copilot (this session) | [User sign-off and evidence](#g00-sign-off-2026-10-22); shared baseline `a7d9f82`; dispatch remains paused |
+| VAR-101 | [Create the synthetic review library](./README.md#var-101-create-the-synthetic-review-library) | Package | To Do | Copilot coordinator | - |
+| VAR-102 | [Build the review-room replay](./README.md#var-102-build-the-review-room-replay) | Package | To Do | Copilot coordinator | - |
+| VAR-103 | [Visualise the supplied offside scene](./README.md#var-103-visualise-the-supplied-offside-scene) | Package | To Do | Copilot coordinator | - |
+| VAR-104 | [Explore evidence and rule references](./README.md#var-104-explore-evidence-and-rule-references) | Package | To Do | Copilot coordinator | - |
+| VAR-105 | [Provide bounded evidence-linked explanations](./README.md#var-105-provide-bounded-evidence-linked-explanations) | Package | To Do | Copilot coordinator | - |
+| VAR-106 | [Read personalised explanations and recaps](./README.md#var-106-read-personalised-explanations-and-recaps) | Package | To Do | Copilot coordinator | - |
+| VAR-107 | [Compare one controlled fact](./README.md#var-107-compare-one-controlled-fact) | Package | To Do | Copilot coordinator | - |
+| VAR-108 | [Prepare acceptance and learning evaluation](./README.md#var-108-prepare-acceptance-and-learning-evaluation) | Package | To Do | Copilot coordinator | - |
+| VAR-G01 | [Integrate and verify the prototype](./README.md#var-g01-integrate-and-verify-the-prototype) | Gate | To Do | Copilot coordinator | Accountable integration owner; work not started |
 
 ## Technical Tasks
 
