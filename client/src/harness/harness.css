@@ -1,0 +1,25 @@
+:root {
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #193246;
+  background: #f3f6fa;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+.harness { width: min(72rem, 100%); margin: 0 auto; padding: clamp(1rem, 4vw, 3rem); overflow-wrap: anywhere; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.5rem); line-height: 1.2; }
+h2 { font-size: 1.2rem; }
+.harness-warning { padding: 0.75rem; border: 2px solid #805000; background: #fff3d6; color: #634000; font-weight: 700; }
+.harness-controls, .harness-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+.harness-controls { min-inline-size: 0; padding: 1rem; border: 1px solid #899bad; }
+.harness-slot { min-width: 0; border: 1px solid #b6c4d2; padding: 1rem; background: #fff; margin-block: 1rem; }
+.harness-slot .harness-slot { margin-block: 0; }
+label, output { display: block; }
+label { margin-bottom: 0.5rem; }
+select, button { max-width: 100%; font: inherit; padding: 0.5rem; border: 1px solid #60768a; border-radius: 0.3rem; background: #fff; color: inherit; }
+select { display: block; width: 100%; }
+button { cursor: pointer; margin: 0.25rem 0; }
+button:disabled { cursor: not-allowed; color: #5b6772; background: #e7ebef; }
+select:focus-visible, button:focus-visible { outline: 3px solid #17593a; outline-offset: 3px; }
+[role="alert"] { border-left: 4px solid #a52222; padding-left: 0.75rem; font-weight: 600; }
+footer { border-top: 1px solid #899bad; margin-top: 2rem; }

@@ -1,0 +1,288 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  scenario(id: String!, requestId: String!): ScenarioResult!
+  scenarios: [ScenarioSummary!]!
+}
+
+type Mutation {
+  explain(input: ExplanationRequestInput!): ExplanationResult!
+}
+
+type AuthoredExplanations {
+  analyst: ExplanationBody!
+  casual: ExplanationBody!
+}
+
+type BooleanFactValue {
+  boolean: Boolean!
+}
+
+type Claim {
+  evidenceIds: [String!]!
+  id: String!
+  ruleIds: [String!]!
+  text: String!
+}
+
+type Comparison {
+  changedFactKey: FactKey!
+  otherScenarioId: ScenarioId!
+  pairId: String!
+}
+
+type ContractError {
+  code: ErrorCode!
+  message: String!
+  requestId: String!
+  retryable: Boolean!
+  schemaVersion: String!
+  status: ResponseStatus!
+}
+
+type Diagram {
+  direction: AttackDirection!
+  markers: [Marker!]!
+  secondLastReferenceX: Float
+  status: DiagramStatus!
+  textAlternative: String!
+}
+
+type ExplanationBody {
+  headline: Claim!
+  interpretation: Interpretation!
+  limitations: [String!]!
+  points: [Claim!]!
+  recap: Claim!
+  sourceMode: SourceMode!
+  status: ResponseStatus!
+}
+
+type ExplanationSuccess {
+  audience: Audience!
+  contentVersion: String!
+  headline: Claim!
+  interpretation: Interpretation!
+  limitations: [String!]!
+  points: [Claim!]!
+  recap: Claim!
+  requestId: String!
+  scenarioId: ScenarioId!
+  schemaVersion: String!
+  sourceMode: SourceMode!
+  status: ResponseStatus!
+}
+
+type Fact {
+  id: String!
+  key: FactKey!
+  sourceLabel: String!
+  status: EvidenceStatus!
+  value: FactValue
+}
+
+type InvolvementFactValue {
+  involvement: ActiveInvolvement!
+}
+
+type Marker {
+  id: String!
+  label: String!
+  role: MarkerRole!
+  x: Float!
+  y: Float!
+}
+
+type MatchContext {
+  awayTeam: String!
+  homeTeam: String!
+  incidentMinute: Int!
+  scoreBefore: Score!
+}
+
+type PlayTypeFactValue {
+  playType: PlayType!
+}
+
+type PositionFactValue {
+  position: ReceiverPosition!
+}
+
+type ReplayEvent {
+  id: String!
+  kind: EventKind!
+  label: String!
+  offsetMs: Int!
+  revealFactIds: [String!]!
+}
+
+type RuleReference {
+  checkedOn: String
+  edition: String
+  id: String!
+  publisher: String!
+  reviewStatus: ReviewStatus!
+  section: String!
+  summary: String!
+  title: String!
+  url: String!
+}
+
+type Scenario {
+  authoredExplanations: AuthoredExplanations!
+  comparison: Comparison
+  contentVersion: String!
+  diagram: Diagram!
+  events: [ReplayEvent!]!
+  facts: [Fact!]!
+  id: ScenarioId!
+  interpretation: Interpretation!
+  label: String!
+  match: MatchContext!
+  originalDecision: OriginalDecision!
+  rules: [RuleReference!]!
+  schemaVersion: String!
+  scoreAfterReview: Score
+  suppliedReviewOutcome: ReviewOutcome
+  synthetic: Boolean!
+}
+
+type ScenarioSummary {
+  contentVersion: String!
+  id: ScenarioId!
+  label: String!
+  synthetic: Boolean!
+}
+
+type Score {
+  away: Int!
+  home: Int!
+}
+
+union ExplanationResult = ExplanationSuccess | ContractError
+
+union FactValue =
+  | BooleanFactValue
+  | PositionFactValue
+  | InvolvementFactValue
+  | PlayTypeFactValue
+
+union ScenarioResult = Scenario | ContractError
+
+input ExplanationRequestInput {
+  audience: Audience!
+  contentVersion: String!
+  requestId: String!
+  scenarioId: ScenarioId!
+  schemaVersion: String!
+  sourceMode: SourceMode!
+}
+
+enum ActiveInvolvement {
+  TOUCH
+}
+
+enum AttackDirection {
+  LEFT_TO_RIGHT
+}
+
+enum Audience {
+  CASUAL
+  ANALYST
+}
+
+enum DiagramStatus {
+  ILLUSTRATIVE
+  UNAVAILABLE
+}
+
+enum ErrorCode {
+  INVALID_REQUEST
+  SCENARIO_NOT_FOUND
+  CONTENT_VERSION_MISMATCH
+  MODEL_NOT_CONFIGURED
+  MODEL_UNAVAILABLE
+  TIMEOUT
+  INVALID_OUTPUT
+}
+
+enum EventKind {
+  PASS
+  RECEIVER_TOUCH
+  SHOT
+  GOAL
+  REVIEW_STARTED
+  REVIEW_READY
+}
+
+enum EvidenceStatus {
+  SUPPLIED
+  MISSING
+}
+
+enum FactKey {
+  PASS_TIME_OBSERVED
+  RECEIVER_IN_OPPONENTS_HALF
+  RECEIVER_AHEAD_OF_BALL
+  RECEIVER_VS_SECOND_LAST
+  ACTIVE_INVOLVEMENT
+  PLAY_TYPE
+  INTERVENING_OPPONENT_TOUCH
+}
+
+enum Interpretation {
+  OFFSIDE_SUPPORTED
+  NO_OFFSIDE_SUPPORTED
+  INSUFFICIENT_EVIDENCE
+}
+
+enum MarkerRole {
+  PASSER
+  RECEIVER
+  OPPONENT
+  BALL
+}
+
+enum OriginalDecision {
+  GOAL_AWARDED
+}
+
+enum PlayType {
+  OPEN_PLAY
+}
+
+enum ReceiverPosition {
+  NEARER
+  LEVEL
+}
+
+enum ResponseStatus {
+  COMPLETE
+  LIMITED
+  ERROR
+}
+
+enum ReviewOutcome {
+  GOAL_DISALLOWED
+  GOAL_CONFIRMED
+}
+
+enum ReviewStatus {
+  DRAFT
+  SOURCE_CHECKED
+  EXPERT_REVIEWED
+}
+
+enum ScenarioId {
+  S1
+  S2
+  S3
+}
+
+enum SourceMode {
+  AUTHORED
+  LIVE_AI
+}

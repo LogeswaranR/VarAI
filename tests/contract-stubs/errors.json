@@ -1,0 +1,9 @@
+[
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "INVALID_REQUEST", "message": "The request is invalid.", "retryable": false },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "SCENARIO_NOT_FOUND", "message": "The requested scenario is unavailable.", "retryable": false },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "CONTENT_VERSION_MISMATCH", "message": "The scenario version has changed. Reload the scenario.", "retryable": false },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "MODEL_NOT_CONFIGURED", "message": "Live explanations are not configured.", "retryable": false },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "MODEL_UNAVAILABLE", "message": "The explanation provider is unavailable.", "retryable": true },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "TIMEOUT", "message": "The explanation attempt timed out.", "retryable": true },
+  { "schemaVersion": "0.2", "requestId": "stub-error-request", "status": "ERROR", "code": "INVALID_OUTPUT", "message": "The explanation response could not be validated.", "retryable": true }
+]

@@ -1,0 +1,116 @@
+fragment ClaimFields on Claim {
+  id
+  text
+  evidenceIds
+  ruleIds
+}
+
+fragment BodyFields on ExplanationBody {
+  sourceMode
+  status
+  interpretation
+  headline { ...ClaimFields }
+  points { ...ClaimFields }
+  limitations
+  recap { ...ClaimFields }
+}
+
+fragment ErrorFields on ContractError {
+  __typename
+  schemaVersion
+  requestId
+  status
+  code
+  message
+  retryable
+}
+
+fragment ExplanationFields on ExplanationSuccess {
+  __typename
+  schemaVersion
+  requestId
+  scenarioId
+  contentVersion
+  audience
+  sourceMode
+  status
+  interpretation
+  headline { ...ClaimFields }
+  points { ...ClaimFields }
+  limitations
+  recap { ...ClaimFields }
+}
+
+fragment ScenarioFields on Scenario {
+  __typename
+  schemaVersion
+  contentVersion
+  id
+  synthetic
+  label
+  match {
+    homeTeam
+    awayTeam
+    incidentMinute
+    scoreBefore { home away }
+  }
+  originalDecision
+  suppliedReviewOutcome
+  scoreAfterReview { home away }
+  interpretation
+  facts {
+    id
+    key
+    status
+    sourceLabel
+    value {
+      __typename
+      ... on BooleanFactValue { boolean }
+      ... on PositionFactValue { position }
+      ... on InvolvementFactValue { involvement }
+      ... on PlayTypeFactValue { playType }
+    }
+  }
+  rules {
+    id
+    title
+    section
+    publisher
+    url
+    edition
+    checkedOn
+    reviewStatus
+    summary
+  }
+  events { id offsetMs kind label revealFactIds }
+  diagram {
+    status
+    direction
+    markers { id role label x y }
+    secondLastReferenceX
+    textAlternative
+  }
+  comparison { pairId otherScenarioId changedFactKey }
+  authoredExplanations {
+    casual { ...BodyFields }
+    analyst { ...BodyFields }
+  }
+}
+
+query Scenarios {
+  scenarios { id contentVersion synthetic label }
+}
+
+query Scenario($id: String!, $requestId: String!) {
+  scenario(id: $id, requestId: $requestId) {
+    ...ScenarioFields
+    ...ErrorFields
+  }
+}
+
+mutation Explain($input: ExplanationRequestInput!) {
+  explain(input: $input) {
+    ...ExplanationFields
+    ...ErrorFields
+  }
+}

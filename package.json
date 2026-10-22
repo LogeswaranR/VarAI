@@ -1,0 +1,50 @@
+{
+  "name": "varai",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "client"
+  ],
+  "engines": {
+    "node": "24.22.1",
+    "npm": "11.19.1"
+  },
+  "packageManager": "npm@11.19.1",
+  "scripts": {
+    "restore": "dotnet restore VarAI.slnx --locked-mode && npm ci",
+    "dev:server": "dotnet run --project server/VarAI.Server.csproj --no-restore --launch-profile http",
+    "dev:client": "npm run dev --workspace @varai/client",
+    "lint:server": "dotnet format VarAI.slnx --verify-no-changes --no-restore",
+    "lint:client": "npm run lint --workspace @varai/client",
+    "lint": "npm run lint:server && npm run lint:client",
+    "typecheck": "npm run typecheck --workspace @varai/client",
+    "test:server": "dotnet test VarAI.slnx --no-restore",
+    "test:client": "npm run test --workspace @varai/client",
+    "test": "npm run test:server && npm run test:client",
+    "build:client": "npm run build --workspace @varai/client",
+    "build:server": "dotnet build VarAI.slnx --no-restore --configuration Release",
+    "build": "npm run build:client && npm run build:server",
+    "publish": "npm run build:client && dotnet publish server/VarAI.Server.csproj --no-restore --configuration Release --output artifacts/publish",
+    "contracts:generate": "dotnet run --project tools/VarAI.ContractTool --no-restore && node scripts/generate-graphql.mjs",
+    "contracts:check": "dotnet run --project tools/VarAI.ContractTool --no-restore -- --check && node scripts/generate-graphql.mjs --check",
+    "test:contracts": "dotnet test tests/VarAI.Server.Tests/VarAI.Server.Tests.csproj --no-restore --filter FullyQualifiedName~Contract && npm run test --workspace @varai/client -- src/contracts",
+    "dev:harness": "npm run dev:harness --workspace @varai/client",
+    "browser:install": "npm run browser:install --workspace @varai/client --",
+    "test:browser": "npm run test:browser --workspace @varai/client",
+    "test:harness": "dotnet test tests/VarAI.Server.Tests/VarAI.Server.Tests.csproj --no-restore --filter FullyQualifiedName~FeatureHarnessTests && npm run test --workspace @varai/client -- src/harness",
+    "test:package:101": "dotnet test tests/VarAI.Server.Tests/VarAI.Server.Tests.csproj --no-restore --filter FullyQualifiedName~FeatureHarnessTests.VAR101",
+    "test:package:102": "npm run test --workspace @varai/client -- src/harness -t VAR-102",
+    "test:package:103": "npm run test --workspace @varai/client -- src/harness -t VAR-103",
+    "test:package:104": "npm run test --workspace @varai/client -- src/harness -t VAR-104",
+    "test:package:105": "dotnet test tests/VarAI.Server.Tests/VarAI.Server.Tests.csproj --no-restore --filter FullyQualifiedName~FeatureHarnessTests.VAR105",
+    "test:package:106": "npm run test --workspace @varai/client -- src/harness -t VAR-106",
+    "test:package:107": "npm run test --workspace @varai/client -- src/harness -t VAR-107",
+    "test:package:108": "npm run test:browser",
+    "verify": "npm run contracts:check && npm run lint && npm run typecheck && npm test && npm run build && npm run test:browser"
+  },
+  "devDependencies": {
+    "@graphql-codegen/core": "6.2.2",
+    "@graphql-codegen/typescript-operations": "6.1.10",
+    "graphql": "17.0.2"
+  }
+}
