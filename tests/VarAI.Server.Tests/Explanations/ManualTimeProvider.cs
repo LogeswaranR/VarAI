@@ -43,6 +43,34 @@ internal sealed class ManualTimeProvider : TimeProvider
         }
     }
 
+    internal int PendingTimers
+    {
+        get
+        {
+            lock (gate)
+            {
+                return timers.Count;
+            }
+        }
+    }
+
+    /// <summary>Jumps to the earliest pending timer and fires it. Returns false when nothing is scheduled.</summary>
+    internal bool AdvanceToNextTimer()
+    {
+        TimeSpan amount;
+        lock (gate)
+        {
+            if (timers.Count == 0)
+            {
+                return false;
+            }
+
+            amount = TimeSpan.FromTicks(Math.Max(0, timers.Min(timer => timer.Due) - ticks));
+        }
+        Advance(amount);
+        return true;
+    }
+
     private sealed class ManualTimer(ManualTimeProvider owner, TimerCallback callback, object? state) : ITimer
     {
         private bool disposed;

@@ -7,6 +7,13 @@ qualified to avoid the transport dependency's generated GreenDonut namespace
 ambiguity; request-ID semantics are unchanged. Historical module-only evidence
 below is preserved. See [current local checks](../../docs/local-delivery.md).
 
+**Shared transport (2026-10-23):** this provider's HTTP transport now lives in `AzureOpenAiChatClient`, which the Match Centre
+narrator (`server/Narration/`) shares. Besides the original API-key mode it adds keyless modes selected by
+`Explanations:AzureOpenAi:AuthMode` (`ManagedIdentity` or `AzureCli`, a Microsoft Entra bearer token through `Azure.Identity`).
+The provider's behaviour, limits and tests are unchanged. See
+[AI narration and approval](../../docs/ai-narration-and-approval.md) and
+[Azure deployment](../../docs/azure-deployment.md).
+
 Originally a standalone backend implementation for the approved
 **GraphQL contract v0.2**, developed at
 `a7d9f82983f4fc35c5a4703dfd69ffde79554240`.
