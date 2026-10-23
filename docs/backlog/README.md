@@ -2,6 +2,12 @@
 
 Backlog revision: 0.4 | Date: 2026-10-21 | Status and ownership: [local board](./board.md)
 
+The user [accepted the local prototype](./board.md#local-prototype-acceptance-2026-10-23)
+on 2026-10-23 with the recorded coverage disposition and limitations. Checked
+criteria refer to that implemented/tested scope, not unperformed expert/user
+research, a full live matrix or production certification. No commit, merge,
+push, deployment or further model spend is implied.
+
 Revision 0.2 added explicit technical child Tasks. Revision 0.3 records the G00
 technology and rule-edition decisions, with separate approval and evidence for
 the T01 scaffold. Revision 0.4 records the separately approved
@@ -14,8 +20,10 @@ commits and two clean-checkout runs. Both runs passed against
 [completion record](../../README.md#t03-clean-checkout-completion-2026-10-22).
 The user separately signed off G00 on 2026-10-22 using shared revision
 `a7d9f82983f4fc35c5a4703dfd69ffde79554240`, whose executable code is unchanged
-from that tested revision. Feature work and dispatch still need separate
-approval; see the [gate record](./board.md#g00-sign-off-2026-10-22).
+from that tested revision; see the [gate record](./board.md#g00-sign-off-2026-10-22).
+On 2026-10-22 the user subsequently authorised Batch 1 queueing, board dispatch,
+hourly scheduling and one immediate scan. That authorisation does not expand
+the feature scope or approve Batch 2, commits, pushes or application-model spend.
 
 This is a product backlog, not an implementation or a claim that the prototype
 works. The user selected an offside-related goal review and repository-only
@@ -98,15 +106,15 @@ been demonstrated by user research.
 
 ### Epic acceptance criteria
 
-- [ ] [VAR-E01-AC1] All three scenarios complete the core journey, with the
+- [x] [VAR-E01-AC1] All three scenarios complete the core journey, with the
   comparison available only for the supported pair.
-- [ ] [VAR-E01-AC2] Explanations expose valid evidence and rule references;
+- [x] [VAR-E01-AC2] Explanations expose valid evidence and rule references;
   missing decisive evidence never becomes a definitive offside conclusion.
-- [ ] [VAR-E01-AC3] Authored and live-model output are visibly distinguished;
+- [x] [VAR-E01-AC3] Authored and live-model output are visibly distinguished;
   at least one authorised live request succeeds through the actual application.
-- [ ] [VAR-E01-AC4] The integrated prototype passes its recorded automated and
+- [x] [VAR-E01-AC4] The integrated prototype passes its recorded automated and
   browser checks, including keyboard use and 375px and 1280px viewport widths.
-- [ ] [VAR-E01-AC5] Run instructions, limitations, source-review status and actual
+- [x] [VAR-E01-AC5] Run instructions, limitations, source-review status and actual
   verification results are available; unperformed user research is marked not run.
 
 **Completion boundary:** a runnable authored-only demo is an intermediate
@@ -256,19 +264,19 @@ authored explanations for both audiences; supplied outcomes and recaps.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-101-AC1] S1, S2 and S3 use fictitious teams and include a pass,
+- [x] [VAR-101-AC1] S1, S2 and S3 use fictitious teams and include a pass,
   receiver touch, shot, goal event and review sequence, with explicit synthetic
   and content-version labels.
-- [ ] [VAR-101-AC2] S1 and S2 differ in exactly one independent football fact;
+- [x] [VAR-101-AC2] S1 and S2 differ in exactly one independent football fact;
   derived layouts and outcomes may differ. S3 marks missing pass-time position
   evidence explicitly rather than substituting a value.
-- [ ] [VAR-101-AC3] Rule summaries link to primary sources with sections,
+- [x] [VAR-101-AC3] Rule summaries link to primary sources with sections,
   edition, check date and honest review status; no expert approval is claimed
   without an actual review.
-- [ ] [VAR-101-AC4] Original decision and supplied review outcome are separate;
+- [x] [VAR-101-AC4] Original decision and supplied review outcome are separate;
   S3 has no invented review outcome or final score. Both audience versions
   preserve the same supported interpretation.
-- [ ] [VAR-101-AC5] Isolated tests validate all records and reject duplicate
+- [x] [VAR-101-AC5] Isolated tests validate all records and reject duplicate
   identifiers, out-of-order events, inconsistent outcomes and unsupported
   comparison changes.
 
@@ -293,17 +301,17 @@ calling a model automatically.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-102-AC1] All three scenarios can be selected, played, paused, resumed
+- [x] [VAR-102-AC1] All three scenarios can be selected, played, paused, resumed
   and restarted; fake-clock tests demonstrate deterministic event ordering.
-- [ ] [VAR-102-AC2] Only information released by the current replay stage is
+- [x] [VAR-102-AC2] Only information released by the current replay stage is
   visible. Scenario changes and restart reset the replay, explanation and recap
   state without changing the source scenario.
-- [ ] [VAR-102-AC3] The shell renders injected scene, evidence, explanation and
+- [x] [VAR-102-AC3] The shell renders injected scene, evidence, explanation and
   comparison slots against stubs; feature implementations are not required for
   its isolated tests.
-- [ ] [VAR-102-AC4] Invalid selection or failed scenario loading produces an
+- [x] [VAR-102-AC4] Invalid selection or failed scenario loading produces an
   explicit recoverable error, never an undisclosed default scenario.
-- [ ] [VAR-102-AC5] Controls work by keyboard, focus is visible, stage changes
+- [x] [VAR-102-AC5] Controls work by keyboard, focus is visible, stage changes
   are announced and the shell has no horizontal overflow at 375px or 1280px.
 
 **Standalone demonstration:** complete a replay using clearly labelled
@@ -327,16 +335,16 @@ offside calculation and match-state ownership.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-103-AC1] S1 and S2 visibly represent their different supplied
+- [x] [VAR-103-AC1] S1 and S2 visibly represent their different supplied
   positional relation and label the drawing as synthetic and illustrative,
   not a measured reconstruction.
-- [ ] [VAR-103-AC2] S3 shows an unavailable pass-time snapshot and no precise
+- [x] [VAR-103-AC2] S3 shows an unavailable pass-time snapshot and no precise
   offside reference line or invented receiver position.
-- [ ] [VAR-103-AC3] The component does not derive a ruling, distance or
+- [x] [VAR-103-AC3] The component does not derive a ruling, distance or
   confidence percentage from diagram coordinates.
-- [ ] [VAR-103-AC4] The scene respects the host's visible-fact list and cannot
+- [x] [VAR-103-AC4] The scene respects the host's visible-fact list and cannot
   reveal a later review outcome before the replay permits it.
-- [ ] [VAR-103-AC5] Isolated tests cover all three states at both target widths;
+- [x] [VAR-103-AC5] Isolated tests cover all three states at both target widths;
   the scene has a useful text alternative and does not rely on colour alone.
 
 **Standalone demonstration:** render each state from props without the replay,
@@ -360,15 +368,15 @@ the source library.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-104-AC1] Visible supplied facts and missing observations are
+- [x] [VAR-104-AC1] Visible supplied facts and missing observations are
   distinguished, with stable identifiers and their provenance.
-- [ ] [VAR-104-AC2] Rule entries show an original summary, section, primary
+- [x] [VAR-104-AC2] Rule entries show an original summary, section, primary
   source link, edition and review status, without presenting VarAI as official.
-- [ ] [VAR-104-AC3] A citation-navigation event focuses the referenced fact or
+- [x] [VAR-104-AC3] A citation-navigation event focuses the referenced fact or
   rule; an unknown identifier produces an explicit unavailable-reference state.
-- [ ] [VAR-104-AC4] Missing decisive evidence remains visible as a limitation;
+- [x] [VAR-104-AC4] Missing decisive evidence remains visible as a limitation;
   the component never replaces it with a guessed fact or confidence score.
-- [ ] [VAR-104-AC5] Isolated tests cover known, missing and invalid references,
+- [x] [VAR-104-AC5] Isolated tests cover known, missing and invalid references,
   keyboard navigation and rejection of non-HTTPS rule links.
 
 **Standalone demonstration:** explore fixture evidence and send navigation
@@ -393,19 +401,19 @@ stubs, including malformed responses and timeouts.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-105-AC1] The service implements the versioned request/response
+- [x] [VAR-105-AC1] The service implements the versioned request/response
   contract and rejects invalid requests, unknown scenarios and content-version
   mismatches with the specified errors.
-- [ ] [VAR-105-AC2] Claims contain valid references to the supplied scenario;
+- [x] [VAR-105-AC2] Claims contain valid references to the supplied scenario;
   missing decisive evidence forces limited status and an insufficient-evidence
   interpretation. Reference validation is not represented as proof of semantic accuracy.
-- [ ] [VAR-105-AC3] Authored mode is explicitly labelled. Live mode uses only
+- [x] [VAR-105-AC3] Authored mode is explicitly labelled. Live mode uses only
   an authorised server-side provider configuration and never silently returns
   authored text or exposes credentials on failure.
-- [ ] [VAR-105-AC4] Tests cover every specified error, the 15-second request
+- [x] [VAR-105-AC4] Tests cover every specified error, the 15-second request
   deadline and the agreed output limits; invalid model output is rejected
   rather than shown as a successful explanation.
-- [ ] [VAR-105-AC5] Tests cover all scenario/audience combinations with injected
+- [x] [VAR-105-AC5] Tests cover all scenario/audience combinations with injected
   data and providers. A real model request is reported as not run until the
   authorised integration check in VAR-G01 succeeds.
 
@@ -430,18 +438,18 @@ authoring and global replay ownership.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-106-AC1] Casual and analyst views use the same scenario/version and
+- [x] [VAR-106-AC1] Casual and analyst views use the same scenario/version and
   supported interpretation; a live request requires an explicit user action
   after the replay reaches review-ready.
-- [ ] [VAR-106-AC2] Loading, error, limited and complete states are distinct;
+- [x] [VAR-106-AC2] Loading, error, limited and complete states are distinct;
   retry is offered only when permitted, and authored/live provenance is always visible.
-- [ ] [VAR-106-AC3] Responses for an old scenario, replay run, audience or mode
+- [x] [VAR-106-AC3] Responses for an old scenario, replay run, audience or mode
   cannot overwrite current content; changing context clears stale explanation
   and recap content.
-- [ ] [VAR-106-AC4] Claim-source controls emit evidence-navigation events.
+- [x] [VAR-106-AC4] Claim-source controls emit evidence-navigation events.
   The recap reports only the supplied match consequence; S3 explicitly states
   that the review outcome is unavailable.
-- [ ] [VAR-106-AC5] Isolated tests cover success, missing evidence, all error
+- [x] [VAR-106-AC5] Isolated tests cover success, missing evidence, all error
   categories and out-of-order responses, with keyboard and responsive checks.
 
 **Standalone demonstration:** switch audience and injected response states
@@ -464,15 +472,15 @@ families, model calls and authoritative counterfactual adjudication.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-107-AC1] Only the S1/S2 pair can be compared; the changed independent
+- [x] [VAR-107-AC1] Only the S1/S2 pair can be compared; the changed independent
   fact is identified separately from derived layout and outcome changes.
-- [ ] [VAR-107-AC2] The comparison is labelled a curated hypothetical, not a
+- [x] [VAR-107-AC2] The comparison is labelled a curated hypothetical, not a
   revision of the original scenario or a real official decision.
-- [ ] [VAR-107-AC3] Selecting either variant emits its identifier to the host;
+- [x] [VAR-107-AC3] Selecting either variant emits its identifier to the host;
   the original can be restored and neither source record is mutated.
-- [ ] [VAR-107-AC4] S3 has no enabled comparison control and explains that
+- [x] [VAR-107-AC4] S3 has no enabled comparison control and explains that
   missing position evidence does not support the offered comparison.
-- [ ] [VAR-107-AC5] Isolated tests prove correct callbacks, immutability,
+- [x] [VAR-107-AC5] Isolated tests prove correct callbacks, immutability,
   keyboard use and the permitted changed-fact boundary without other features.
 
 **Standalone demonstration:** compare the baseline pair and inspect emitted
@@ -496,18 +504,18 @@ inventing reviewer feedback and claiming that a small study proves demand.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-108-AC1] The test matrix covers all three scenarios, both audiences,
+- [x] [VAR-108-AC1] The test matrix covers all three scenarios, both audiences,
   both modes, failure paths, replay reset, stale responses and target browser states.
-- [ ] [VAR-108-AC2] The harness can be developed against a contract stub;
+- [x] [VAR-108-AC2] The harness can be developed against a contract stub;
   stub results and real-application results are clearly separated, and absent
   live credentials produce a reported skip or block, never a pass.
-- [ ] [VAR-108-AC3] Checks cover unknown citations, contradictory structured
+- [x] [VAR-108-AC3] Checks cover unknown citations, contradictory structured
   interpretations, team-name swaps and audience consistency; semantic claim
   correctness is also assigned to human review.
-- [ ] [VAR-108-AC4] The study pack includes a written-explanation baseline,
+- [x] [VAR-108-AC4] The study pack includes a written-explanation baseline,
   new comprehension examples, expected answers, a five-viewer protocol and a
   separate qualified-rules-review checklist, all labelled with content-review status.
-- [ ] [VAR-108-AC5] Each business requirement maps to a check, expected result
+- [x] [VAR-108-AC5] Each business requirement maps to a check, expected result
   and evidence location; result fields remain not run until execution.
 
 **Standalone demonstration:** run the harness against its contract stub and
@@ -527,19 +535,19 @@ the relevant package owner rather than expanding another agent's scope.
 
 **Acceptance criteria:**
 
-- [ ] [VAR-G01-AC1] All eight packages are integrated against the same contract
+- [x] [VAR-G01-AC1] All eight packages are integrated against the same contract
   and content version; production execution paths contain no undisclosed
   placeholder panels, provider stubs or success-shaped fallbacks.
-- [ ] [VAR-G01-AC2] The real application passes the requirement-mapped
+- [x] [VAR-G01-AC2] The real application passes the requirement-mapped
   automated and browser checks; rule-source and semantic-content review findings
   are recorded and material failures are resolved.
-- [ ] [VAR-G01-AC3] After separate access and spending approval, a live request
+- [x] [VAR-G01-AC3] After separate access and spending approval, a live request
   succeeds through the application; its scenario, content version, mode and
   measured outcome are recorded without credentials or sensitive logs.
-- [ ] [VAR-G01-AC4] The demo walkthrough, run instructions, limitations and
+- [x] [VAR-G01-AC4] The demo walkthrough, run instructions, limitations and
   actual verification results are saved; user-study and expert-review results
   are marked not run wherever they have not happened.
-- [ ] [VAR-G01-AC5] Every epic criterion has linked evidence. Missing live
+- [x] [VAR-G01-AC5] Every epic criterion has linked evidence. Missing live
   access or failed mandatory checks keeps this gate open; an authored-only
   demonstration is not marked as completion of the full epic.
 
@@ -620,13 +628,13 @@ re-importing this ID-free creation CSV would create duplicates.
 | --- | --- | --- |
 | Incident family | Offside-related goal review, selected by user | Decided |
 | Tracker | Repository-only; Azure Boards import paused by user decision after an organisation access block | Decided |
-| Delivery workflow | Hourly native scans saved disabled; two Astra development/two Sol QA slots; four-package batch sign-off | Approved configuration; native worker execution remains unverified |
+| Delivery workflow | Hourly native scans resumed for Batch 1; two Astra development/two Sol QA slots; four-package batch sign-off | Activation approved, 2026-10-22; worker execution requires actual claims/evidence |
 | Framework | ASP.NET Core/C# on .NET 10 LTS with React/TypeScript; one deployable application | Direction approved, 2026-10-21 |
 | Tooling and version pins | T01/T02 tooling plus Playwright 1.64.1 and SHA-pinned GitHub Actions configuration; [local checks and limitations recorded](../../README.md#t03-local-evidence-and-remaining-gate-2026-10-22) | Product/integration owner, G00 |
 | Shared contract and layout | GraphQL v0.2 replaces the proposed REST transport; C# schema, generated TypeScript operation types and mapped package ownership; domain behavior retained | Approved, 2026-10-21 |
 | G00 sign-off / shared baseline | User approved `a7d9f82983f4fc35c5a4703dfd69ffde79554240` and the recorded gate evidence/limitations | Approved, 2026-10-22 |
 | Package accountability | Copilot coordinator accountable for VAR-101 through VAR-108 and G01; actual workers assigned only through separately authorised claims | Approved, 2026-10-22; live assignments only in board |
-| Implementation permission | Baseline work and the local G00 approval-record commit authorised; no feature package, worker dispatch, scheduling activation, push or remote CI authorised | Product owner, separate next approval |
+| Implementation permission | VAR-101/102/105/108 queued for the approved model roles, with board dispatch, hourly scans and one immediate scan authorised; no new commit/push, remote CI, Batch 2 or application-model spend | User approval, 2026-10-22 |
 | Clean-checkout verification | Both isolated clones passed at `e7b8d138d58228521ae95f5dfb68fd2599b95107`; source remained clean; remote CI not run | Verified T03 evidence, 2026-10-22 |
 | Applicable law edition | IFAB 2026/27 approved; publication confirmed in the [official library](https://www.theifab.com/laws-of-the-game-documents/); scenario-specific source checks remain required | Edition approved, 2026-10-21; content owner, G00 |
 | Legal/content authority | Illustrative prototype, not official adjudication; scenario content remains draft and expert review has not been performed | Content owner, G00/G01 |

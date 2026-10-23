@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:harness": "vite --mode harness --port 4173 --strictPort",
+    "dev:harness": "vite --mode harness",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "test": "vitest run",
     "test:browser": "playwright test",
+    "test:integration": "playwright test --config playwright.integration.config.ts",
     "browser:install": "playwright install chromium"
   },
   "dependencies": {

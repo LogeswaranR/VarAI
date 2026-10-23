@@ -1,0 +1,5 @@
+.comparison-variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.comparison-variants section { padding: 0.75rem; border: 1px solid #bdcbd7; border-radius: 0.4rem; }
+.comparison-variants h3 { margin-top: 0; }
+.comparison-current { background: #e2f1e9; border-left: 4px solid #17593a !important; }
+@media (max-width: 28rem) { .comparison-variants { grid-template-columns: minmax(0, 1fr); } }

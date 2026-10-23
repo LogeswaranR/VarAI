@@ -170,10 +170,10 @@ dispatch, pushing, remote CI or a real application-model request.
 diagram inputs and authored explanations for both audiences using the approved
 schema and source edition.
 
-- [ ] [VAR-101-T01-AC1] All three records include synthetic provenance, content
+- [x] [VAR-101-T01-AC1] All three records include synthetic provenance, content
   version and honest source-review status; facts, original decision, supplied
   outcome and score consequence occupy their separate contract fields.
-- [ ] [VAR-101-T01-AC2] S1/S2 change only the permitted independent fact, S3
+- [x] [VAR-101-T01-AC2] S1/S2 change only the permitted independent fact, S3
   preserves unknown positions and outcome, and the six authored explanations
   use valid references and the same supported interpretation across audiences.
 
@@ -189,10 +189,10 @@ schema and source edition.
 interface. Add dataset invariants and package tests; test authoring can start
 against baseline stubs before full content is available.
 
-- [ ] [VAR-101-T02-AC1] Lookup preserves the requested scenario and content
+- [x] [VAR-101-T02-AC1] Lookup preserves the requested scenario and content
   version, reports unknown IDs, mismatched versions and invalid content
   explicitly, and cannot mutate the source records.
-- [ ] [VAR-101-T02-AC2] Tests run against the delivered library and reject
+- [x] [VAR-101-T02-AC2] Tests run against the delivered library and reject
   duplicate IDs, broken references, non-increasing event times, inconsistent
   outcomes and a second independent fact change in the comparison pair.
 
@@ -209,10 +209,10 @@ against baseline stubs before full content is available.
 **Scope:** Implement replay transitions, event visibility and the replay-run
 identifier independently of the panel implementations.
 
-- [ ] [VAR-102-T01-AC1] Fake-clock tests prove play, pause, resume and restart
+- [x] [VAR-102-T01-AC1] Fake-clock tests prove play, pause, resume and restart
   behavior; pause stops progression and restarting or selecting a scenario
   resets the sequence with a fresh run ID without mutating input records.
-- [ ] [VAR-102-T01-AC2] Facts and context evidence appear only at their approved
+- [x] [VAR-102-T01-AC2] Facts and context evidence appear only at their approved
   stages, including the original decision at the goal event and supplied review
   outcome at review-ready; reset invalidates explanation and recap state.
 
@@ -228,10 +228,10 @@ identifier independently of the panel implementations.
 source-navigation and comparison-selection callbacks through the host without
 importing unfinished panels.
 
-- [ ] [VAR-102-T02-AC1] The shell runs with placeholder panels and a stub
+- [x] [VAR-102-T02-AC1] The shell runs with placeholder panels and a stub
   repository, forwards the agreed props/events and exposes recoverable loading
   or selection errors instead of silently selecting another scenario.
-- [ ] [VAR-102-T02-AC2] Keyboard, focus, status-announcement and 375px/1280px
+- [x] [VAR-102-T02-AC2] Keyboard, focus, status-announcement and 375px/1280px
   layout checks pass with the delivered replay state; shell interaction never
   initiates an automatic model request.
 
@@ -248,10 +248,10 @@ importing unfinished panels.
 **Scope:** Render the supplied diagram props and equivalent text, respecting
 fact visibility. Do not calculate a decision from coordinates.
 
-- [ ] [VAR-103-T01-AC1] S1/S2 visibly differ as supplied; before fact release
+- [x] [VAR-103-T01-AC1] S1/S2 visibly differ as supplied; before fact release
   the scene is neutral, and S3 has no invented receiver position or reference
   line. No coordinate becomes a measured distance, ruling or confidence score.
-- [ ] [VAR-103-T01-AC2] Isolated rendering tests cover all states at 375px and
+- [x] [VAR-103-T01-AC2] Isolated rendering tests cover all states at 375px and
   1280px; synthetic/illustrative labels, text alternatives and non-colour-only
   distinctions remain available without other feature modules.
 
@@ -268,10 +268,10 @@ fact visibility. Do not calculate a decision from coordinates.
 **Scope:** Render supplied, missing and context evidence plus rule metadata,
 using only the visible records passed by the host.
 
-- [ ] [VAR-104-T01-AC1] Fact and context entries retain their IDs, provenance
+- [x] [VAR-104-T01-AC1] Fact and context entries retain their IDs, provenance
   and missing status; rule entries show section, edition and honest review
   status without claiming official or expert approval that has not occurred.
-- [ ] [VAR-104-T01-AC2] Tests cover missing evidence, draft metadata and unsafe
+- [x] [VAR-104-T01-AC2] Tests cover missing evidence, draft metadata and unsafe
   link schemes; text is rendered as text, only HTTPS rule links are actionable
   and no absent value is replaced by a guessed fact or confidence percentage.
 
@@ -286,10 +286,10 @@ using only the visible records passed by the host.
 **Scope:** Resolve source-selection events to visible fact, rule and fixed
 context IDs; provide keyboard-accessible focus and explicit unresolved states.
 
-- [ ] [VAR-104-T02-AC1] Tests navigate to known fact/rule references and all
+- [x] [VAR-104-T02-AC1] Tests navigate to known fact/rule references and all
   four context-reference types when visible; hidden or unknown IDs produce an
   unavailable-reference state, not a revealed or substituted source.
-- [ ] [VAR-104-T02-AC2] Focus and status changes are accessible by keyboard;
+- [x] [VAR-104-T02-AC2] Focus and status changes are accessible by keyboard;
   a cleared selection cannot leave stale source emphasis after a scenario
   change, and no explanation component is needed for these tests.
 
@@ -307,10 +307,10 @@ context IDs; provide keyboard-accessible focus and explicit unresolved states.
 and output-validator boundaries. Handle correlation IDs, authored mode and
 user-safe errors without registering the root HTTP route.
 
-- [ ] [VAR-105-T01-AC1] Requests are validated against the approved contract;
+- [x] [VAR-105-T01-AC1] Requests are validated against the approved contract;
   unknown scenarios and version mismatches return their specified errors, while
   authored responses are explicitly labelled and never initiate provider calls.
-- [ ] [VAR-105-T01-AC2] Tests exercise all scenario/audience combinations with
+- [x] [VAR-105-T01-AC2] Tests exercise all scenario/audience combinations with
   injected collaborators; failures retain safe correlation and error codes
   without exposing credentials or raw provider payloads in responses or logs.
 
@@ -326,10 +326,10 @@ user-safe errors without registering the root HTTP route.
 configuration boundary. Verify the chosen SDK/API before implementation; this
 Task does not authorise deployment, spending or a real request.
 
-- [ ] [VAR-105-T02-AC1] Explicit live mode uses server-side configuration;
+- [x] [VAR-105-T02-AC1] Explicit live mode uses server-side configuration;
   missing configuration, provider unavailability and the 15-second deadline
   produce the specified errors without invisible retries or authored fallback.
-- [ ] [VAR-105-T02-AC2] Injected-provider and fake-clock tests cover success,
+- [x] [VAR-105-T02-AC2] Injected-provider and fake-clock tests cover success,
   failure and cancellation/deadline behavior; secrets stay out of browser
   bundles, responses and logs, and real access remains not run until G01.
 
@@ -347,10 +347,10 @@ structural validation proves semantic correctness. Reuse G00's contract helpers;
 add provider-output parsing, semantic expectations and real service integration
 rather than copying shared validation or treating stub checks as this feature.
 
-- [ ] [VAR-105-T03-AC1] Malformed output, unknown references, contradictory
+- [x] [VAR-105-T03-AC1] Malformed output, unknown references, contradictory
   structured interpretations and missing required limitations are rejected as
   INVALID_OUTPUT; S3 can only produce limited, insufficient-evidence output.
-- [ ] [VAR-105-T03-AC2] Tests exercise exactly 90/220 explanation words and
+- [x] [VAR-105-T03-AC2] Tests exercise exactly 90/220 explanation words and
   40 recap words plus one-word-over failures, both audiences and team-label
   swaps; no failed output is silently rewritten into a successful response.
 
@@ -367,10 +367,10 @@ rather than copying shared validation or treating stub checks as this feature.
 **Scope:** Implement the request state with an injected client, explicit user
 action, audience/mode selection and stale-response protection.
 
-- [ ] [VAR-106-T01-AC1] Requests are enabled only at review-ready and contain
+- [x] [VAR-106-T01-AC1] Requests are enabled only at review-ready and contain
   the current scenario, content version, audience, mode and a fresh request ID;
   changing context clears old explanation/recap state without automatic requests.
-- [ ] [VAR-106-T01-AC2] Out-of-order and prior-run responses cannot overwrite
+- [x] [VAR-106-T01-AC2] Out-of-order and prior-run responses cannot overwrite
   current state; tests cover all error codes, permit retry only when allowed
   and prove that retries require another explicit user action.
 
@@ -385,10 +385,10 @@ action, audience/mode selection and stale-response protection.
 **Scope:** Bind reader state to loading, error, limited and complete views;
 render citations, provenance and the supplied match consequence.
 
-- [ ] [VAR-106-T02-AC1] Fixture-backed views distinguish authored/live output,
+- [x] [VAR-106-T02-AC1] Fixture-backed views distinguish authored/live output,
   emit agreed source-navigation events and show S3's unavailable outcome without
   inventing a final score; model text is not rendered as executable markup.
-- [ ] [VAR-106-T02-AC2] Keyboard, focus, announcement and responsive checks pass
+- [x] [VAR-106-T02-AC2] Keyboard, focus, announcement and responsive checks pass
   with the delivered request state and all error/limited-result fixtures;
   no backend or evidence-panel implementation is required.
 
@@ -405,10 +405,10 @@ render citations, provenance and the supplied match consequence.
 **Scope:** Render only the approved S1/S2 comparison and emit host selection
 callbacks. Keep independent fact changes distinct from their derived outcomes.
 
-- [ ] [VAR-107-T01-AC1] The comparison is labelled hypothetical and available
+- [x] [VAR-107-T01-AC1] The comparison is labelled hypothetical and available
   only when permitted by replay state; S3 and invalid pairs show an explicit
   unavailable state rather than an arbitrary comparison.
-- [ ] [VAR-107-T01-AC2] Tests highlight the permitted changed fact, select and
+- [x] [VAR-107-T01-AC2] Tests highlight the permitted changed fact, select and
   restore the original variant without mutating either record, and verify
   keyboard operation and callbacks without replay or model implementations.
 
@@ -425,10 +425,10 @@ callbacks. Keep independent fact changes distinct from their derived outcomes.
 **Scope:** Author black-box checks from published routes, hooks and fixtures;
 map business requirements to expected outcomes and evidence records.
 
-- [ ] [VAR-108-T01-AC1] The matrix covers BR-01 through BR-10, the twelve
+- [x] [VAR-108-T01-AC1] The matrix covers BR-01 through BR-10, the twelve
   scenario/audience/mode combinations, error paths, reference and interpretation
   failures, replay resets, stale responses and both target viewport widths.
-- [ ] [VAR-108-T01-AC2] The harness runs against a contract stub with results
+- [x] [VAR-108-T01-AC2] The harness runs against a contract stub with results
   labelled accordingly; missing application access or live credentials is
   reported as not run, skipped or blocked rather than successful acceptance.
 
@@ -444,10 +444,10 @@ map business requirements to expected outcomes and evidence records.
 claim-review rubric and the viewer-study pack. Test inputs may use approved
 baseline stubs rather than waiting for the production library.
 
-- [ ] [VAR-108-T02-AC1] Golden expectations cover missing evidence, audience
+- [x] [VAR-108-T02-AC1] Golden expectations cover missing evidence, audience
   consistency and team-label swaps; the rubric separately checks reference
   existence and whether a claim follows from its evidence, with review status recorded.
-- [ ] [VAR-108-T02-AC2] The five-viewer protocol includes the written baseline,
+- [x] [VAR-108-T02-AC2] The five-viewer protocol includes the written baseline,
   varied presentation order, new comprehension examples and proposed expected
   answers, plus a qualified-review checklist; unperformed reviews and study
   results remain not run and cannot be reported as proven user value.
@@ -468,10 +468,10 @@ and client transport adapters. Replace development placeholders without changing
 another package's ownership. Validate HTTP/media-type and GraphQL error handling;
 do not revive the superseded `/api/explanations` REST proposal.
 
-- [ ] [VAR-G01-T01-AC1] All modules use the approved schema/content versions;
+- [x] [VAR-G01-T01-AC1] All modules use the approved schema/content versions;
   application routes and composition slots invoke real implementations, with
   no undisclosed fixture provider or placeholder in the runtime path.
-- [ ] [VAR-G01-T01-AC2] An authored-mode smoke journey reaches explanation,
+- [x] [VAR-G01-T01-AC2] An authored-mode smoke journey reaches explanation,
   source navigation, comparison reset and recap through the actual application
   without initiating a live-model request.
 
@@ -487,10 +487,10 @@ do not revive the superseded `/api/explanations` REST proposal.
 suite, then inspect semantic content and the browser experience. Fault-injected
 provider checks are recorded separately from actual provider observations.
 
-- [ ] [VAR-G01-T02-AC1] Mandatory type, build, automated and browser checks pass
+- [x] [VAR-G01-T02-AC1] Mandatory type, build, automated and browser checks pass
   against the delivered application, including evidence failures, freshness,
   missing data, keyboard navigation and 375px/1280px layouts.
-- [ ] [VAR-G01-T02-AC2] Rule-source and claim-review findings are recorded,
+- [x] [VAR-G01-T02-AC2] Rule-source and claim-review findings are recorded,
   material failures return to their owning package and keep acceptance open,
   and no unavailable or unexecuted check is relabelled as a pass.
 
@@ -506,10 +506,10 @@ provider checks are recorded separately from actual provider observations.
 request through the real application. Do not provision resources or bypass
 account restrictions.
 
-- [ ] [VAR-G01-T03-AC1] At least one authorised live request returns the
+- [x] [VAR-G01-T03-AC1] At least one authorised live request returns the
   expected scenario/version, visible live provenance and valid references;
   record its time, measured duration and result without credentials or raw payloads.
-- [ ] [VAR-G01-T03-AC2] Missing authorisation, configuration or a failed request
+- [x] [VAR-G01-T03-AC2] Missing authorisation, configuration or a failed request
   leaves this Task blocked or failed; an authored response or provider stub is
   never accepted as live evidence, and no unmeasured cost is presented as a cap.
 
@@ -524,9 +524,9 @@ account restrictions.
 **Scope:** Save reproducible run instructions, the demo walkthrough, versioned
 verification records and explicit limitations. Keep secrets out of all artifacts.
 
-- [ ] [VAR-G01-T04-AC1] The handoff records commands actually run, their results,
+- [x] [VAR-G01-T04-AC1] The handoff records commands actually run, their results,
   content/source versions and safe setup instructions; not-run expert review,
   user studies and unavailable checks are identified separately.
-- [ ] [VAR-G01-T04-AC2] Every epic criterion has linked evidence and all
+- [x] [VAR-G01-T04-AC2] Every epic criterion has linked evidence and all
   mandatory gates pass before full completion is claimed; technical success is
   not described as validated learning impact, complete security or commercial demand.

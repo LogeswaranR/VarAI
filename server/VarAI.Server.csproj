@@ -17,6 +17,10 @@
     <ProjectReference Include="Contracts\VarAI.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="HotChocolate.AspNetCore" Version="16.6.9" />
+  </ItemGroup>
+
   <Target Name="RequireClientBuildForPublish" BeforeTargets="PrepareForPublish">
     <Error Condition="!Exists('$(MSBuildProjectDirectory)/../client/dist/index.html')" Text="Build the client first with 'npm run build:client', or use 'npm run publish' from the repository root." />
   </Target>

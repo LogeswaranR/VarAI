@@ -1,0 +1,13 @@
+.scene { margin: 0; }
+.scene figcaption strong, .scene figcaption span { display: block; }
+.scene figcaption span, .scene-reference, .scene-legend { font-size: 0.875rem; }
+.scene svg { display: block; width: 100%; height: auto; margin: 1rem 0 0.5rem; }
+.scene .pitch { fill: #164936; }
+.scene .pitch-lines { fill: none; stroke: #aecaba; stroke-width: 0.5; }
+.scene .position-reference { stroke: #fff2ad; stroke-width: 0.7; stroke-dasharray: 2 1.5; }
+.scene-marker { stroke: #111e27; stroke-width: 0.65; fill: #fff; }
+.scene-marker.marker-receiver { fill: #ffd66e; }
+.scene-marker.marker-opponent { fill: #b6dfff; }
+.scene-marker text { fill: #fff; stroke: #123226; stroke-width: 1; paint-order: stroke; font: bold 4px system-ui, sans-serif; }
+.scene-direction { font-weight: 650; }
+.scene-legend { padding-left: 1.5rem; }

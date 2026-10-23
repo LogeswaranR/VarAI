@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using VarAI.Contracts;
 using VarAI.ContractStubs;
@@ -115,13 +116,18 @@ public sealed class GraphQlContractTests
     }
 
     [TestMethod]
-    public async Task TheApplicationStillHasNoGraphQlEndpointOrStubDependency()
+    public async Task TheApplicationExposesRealScenariosWithoutAnyStubDependency()
     {
         using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
-        using var response = await client.PostAsync("/graphql",
-            new StringContent("""{"query":"{ scenarios { id } }"}"""), TestContext.CancellationToken);
-        Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+        using var response = await client.PostAsJsonAsync("/graphql",
+            new { query = "{ scenarios { id contentVersion } }" }, TestContext.CancellationToken);
+        Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.CancellationToken);
+        Assert.IsFalse(payload.TryGetProperty("errors", out _), payload.ToString());
+        var scenarios = payload.GetProperty("data").GetProperty("scenarios");
+        Assert.AreEqual(3, scenarios.GetArrayLength());
+        Assert.AreEqual("synthetic-1.0.0", scenarios[0].GetProperty("contentVersion").GetString());
         Assert.IsFalse(typeof(Program).Assembly.GetReferencedAssemblies()
             .Any(assembly => assembly.Name == "VarAI.ContractStubs"));
         Assert.IsFalse(typeof(StubData).Assembly.GetReferencedAssemblies()

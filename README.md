@@ -1,14 +1,24 @@
 # VarAI
 An evidence-backed synthetic offside-review explainer, not an AI referee.
 
-## Local scaffold
+## Local prototype
 
-VAR-G00-T01 provides an ASP.NET Core/C# host and a React/TypeScript client.
-The UI is explicitly a placeholder: no scenarios, replay, rule inspection,
-authored explanations or live-model integration are implemented.
-T02 adds the isolated [GraphQL contract](./docs/backlog/contract-v0.2.md) and
-deterministic development/test fixtures. They are not wired into this UI or an
-HTTP GraphQL endpoint.
+The application combines the real replay, illustrative SVG scene, evidence
+explorer, explanation reader and curated S1/S2 comparison. ASP.NET Core serves
+the synthetic scenario repository and explanation service at `/graphql`,
+using the approved [v0.2 contract](./docs/backlog/contract-v0.2.md).
+Authored explanations work without model access. Live access is disabled by
+default; an explicit Live AI request returns `MODEL_NOT_CONFIGURED`, never
+an authored fallback.
+
+**Local prototype accepted (2026-10-23):** the user accepted the integrated
+experience, scoped coverage evidence and one successful Azure live smoke.
+The accepted source is now consolidated into this checkout on
+`prototype/accepted-local-delivery`; `main` and the original worktrees are
+unchanged. See the [acceptance record and limits](./docs/backlog/board.md#local-prototype-acceptance-2026-10-23)
+and [local run guide](./docs/local-delivery.md).
+The dated G00 verification sections below are historical evidence, not new
+checks or claims of production, expert or learning-study certification.
 
 ### Toolchain
 
@@ -90,10 +100,11 @@ npm run dev:server
 npm run dev:client
 ```
 
-Vite proxies `/health` and `/api` to the development host. The backend's root
+Vite proxies `/health`, `/graphql` and `/api` to the development host.
+`VARAI_API_ORIGIN` can select an explicitly owned loopback API port. The backend's root
 URL intentionally returns 404 in Development; open the Vite URL for the UI.
-`GET /health` reports `{"status":"ok","stage":"scaffold-only"}`. This is
-process readiness, not evidence that review features or model access work.
+`GET /health` reports `{"status":"ok","stage":"local-review","schemaVersion":"0.2"}`.
+This is process readiness, not evidence of live-model access or product acceptance.
 Unimplemented API routes return a 404 problem response, never the SPA HTML
 or a fabricated explanation.
 
@@ -102,7 +113,9 @@ No model credentials or account access are required. The
 and is not loaded automatically. The documented development command uses the
 non-secret HTTP launch profile. Local `.env` files and
 `server/appsettings.Local.json` are ignored; the latter is not automatically
-loaded by this scaffold. Never put credentials in browser-visible `VITE_*`
+loaded by the host. `Explanations:LiveEnabled` is false by default; use
+`--Explanations:LiveEnabled=false` explicitly for model-free previews/tests.
+Never put credentials in browser-visible `VITE_*`
 variables.
 
 ### Publish locally as one application
@@ -110,7 +123,7 @@ variables.
 ```bash
 npm run publish
 cd artifacts/publish
-ASPNETCORE_ENVIRONMENT=Production dotnet VarAI.Server.dll --urls http://127.0.0.1:5075
+ASPNETCORE_ENVIRONMENT=Production dotnet VarAI.Server.dll --urls http://127.0.0.1:5075 --Explanations:LiveEnabled=false
 ```
 
 Open `http://127.0.0.1:5075`. One .NET process serves the built React assets
@@ -121,19 +134,19 @@ to build it first.
 
 ### Layout and ownership
 
-| Area | T01 responsibility |
+| Area | Current responsibility |
 | --- | --- |
-| [server/](./server/) | ASP.NET Core entry point, readiness route and published static-file hosting |
-| [client/](./client/) | Vite/React entry point, labelled placeholder and UI unit tests |
-| [tests/VarAI.Server.Tests/](./tests/VarAI.Server.Tests/) | In-memory host/readiness/error tests |
+| [server/](./server/) | Scenario/explanation services, GraphQL HTTP, readiness and published static files |
+| [client/](./client/) | Replay with four real panels, fetch adapters and component/browser tests |
+| [tests/VarAI.Server.Tests/](./tests/VarAI.Server.Tests/) | Contract, scenario, provider, service and real HTTP tests |
 | Root manifests, lockfiles and configuration | One coordinated build owned by the G00 integration owner |
 
 Keep [server/wwwroot/.gitkeep](./server/wwwroot/.gitkeep): ASP.NET Core's
 static-web-assets loader needs the physical web-root directory after the
 linked frontend assets have been built, including during host tests.
 The [v0.2 ownership table](./docs/backlog/contract-v0.2.md#1-sources-of-truth-and-ownership)
-maps shared contracts and future feature packages. The T01 production shell still has no feature composition. T03 supplies a
-separate test-only harness entry and local CI definition described below.
+maps shared contracts and feature packages. T03 supplies a separate test-only
+harness entry and local CI definition described below.
 Current assignments remain in the
 [local board](./docs/backlog/board.md).
 
@@ -262,15 +275,16 @@ created. T02 is complete; G00 remains open.
 
 The harness uses the same React/Vite project, contracts, fixtures and test
 runners. It is not a second deployable application or a completed review room.
-The production HTML entry is unchanged.
+The harness remains separate from the real application entry.
 
 With the toolchain activated:
 
 ```bash
-npm run dev:harness
+npm run dev:harness -- --port 43174 --strictPort
 ```
 
-Open `http://127.0.0.1:4173/harness.html`. No backend server, model credentials or
+Verify port 43174 is free first, then open `http://127.0.0.1:43174/harness.html`.
+Never reuse an existing preview on port 4173. No backend server, model credentials or
 cloud account is needed. The page starts with **placeholders only** and a
 permanent test-stub warning. Choose a fixture scenario/stage and one optional
 test probe. Stage controls select fixture inputs, not elapsed replay time.
@@ -295,28 +309,28 @@ Inject the approved repository/client stubs and explicit test inputs. Omitted
 slots remain visible placeholders. The supplied probes demonstrate the seams,
 not a reference implementation of replay, evidence navigation or explanations.
 
-Package-scoped **baseline** commands:
+Package selectors now target delivered implementations, not the original G00 probes:
 
 | Package | Command | What is checked now |
 | --- | --- | --- |
-| VAR-101 | `npm run test:package:101` | Repository stub seam |
-| VAR-102 | `npm run test:package:102` | Shell slot and injected repository |
-| VAR-103 | `npm run test:package:103` | Scene slot and supplied/missing snapshot inputs |
-| VAR-104 | `npm run test:package:104` | Evidence slot, staged context and explicit nulls |
-| VAR-105 | `npm run test:package:105` | Explanation service and raw-provider seams |
-| VAR-106 | `npm run test:package:106` | Client injection, explicit requests/errors, IDs and source callbacks |
-| VAR-107 | `npm run test:package:107` | Comparison callback and unavailable S3 input |
-| VAR-108 | `npm run test:package:108` | Stub-backed browser checks at both widths |
+| VAR-101 | `npm run test:package:101` | Scenario library, invariants and immutable repository |
+| VAR-102 | `npm run test:package:102` | Replay controller and shell with injected collaborators |
+| VAR-103 | `npm run test:package:103` | SVG scene, staged disclosure and unavailable snapshot |
+| VAR-104 | `npm run test:package:104` | Evidence rendering, citation focus and safe source links |
+| VAR-105 | `npm run test:package:105` | Service/validator and injected provider tests; no live access |
+| VAR-106 | `npm run test:package:106` | Reader, request freshness, errors, sources and recap |
+| VAR-107 | `npm run test:package:107` | Hypothetical pair and reversible callbacks |
+| VAR-108 | `npm run test:package:108` | Acceptance runner/reporting and real-reader fixture checks |
 
-These commands deliberately work while production feature directories are
-absent. They **cannot establish that a feature package is complete**. Add the
-candidate's own acceptance tests and extend its selector with coordinator
-approval when that package is implemented. Other probes are intentionally
-non-selected in scoped Vitest runs; the full suite runs all of them.
+These checks do not replace combined independent review or human acceptance.
+The original G00 probe checks remain in the full unit suite and `test:harness`.
+Run application and separate fixture browsers using the
+[local guide](./docs/local-delivery.md); do not conflate their evidence.
 
 `npm run test:harness` runs all local harness unit checks.
-`npm run test:browser` runs all browser checks and owns/stops its Vite server.
-It refuses to reuse an existing server on port 4173. Stop a manually started
+`npm run test:browser` runs the preserved G00 harness checks and owns/stops its
+Vite server. It refuses to reuse an existing server; the default port is 43174
+or an explicit `VARAI_HARNESS_PORT`, never 4173. Stop a manually started
 harness first. During automated runs only, file watching and HMR are disabled
 to prevent edits/reloads from replacing test state. Normal development retains
 HMR. Failure traces go to the ignored client test-results directory.
@@ -325,8 +339,9 @@ The CI definition is for future push/PR checks on Ubuntu 24.04. It installs the
 pinned SDK/Node versions, restores lockfiles, installs Chromium with Linux
 dependencies, runs `npm run verify` and publishes locally with `npm run publish`.
 It references no provider secrets, makes no live-model call and deploys nothing.
-It has not been published or executed on GitHub; native board scheduling is a
-separate mechanism and remains disabled.
+The existing push/PR triggers run these model-free checks when this branch is
+published. Local results do not establish a successful remote CI run; inspect
+GitHub Actions separately. Native board scheduling remains disabled.
 
 ## T03 local evidence and remaining gate (2026-10-22)
 
@@ -434,9 +449,10 @@ an invented developer/QA identity or an active worker assignment. Actual claims
 and worker attachment require a separate approved dispatch step.
 
 The [canonical board](./docs/backlog/board.md#g00-sign-off-2026-10-22) records
-G00 as Done and maps its four criteria to approval/evidence. All feature packages
-remain To Do; Dispatch remains Paused; no native schedule, worker or feature
-implementation was started. The approved commit's board is a historical
+G00 as Done and maps its four criteria to approval/evidence. At sign-off, all
+feature packages remained To Do and Dispatch remained Paused; the gate-record
+change started no schedule, worker or feature implementation. The approved
+commit's board is a historical
 snapshot: future workers must receive current coordinator gate/claim context
 alongside the common baseline, following the existing handoff procedure.
 
@@ -455,12 +471,26 @@ unverified or unapproved. G00 sign-off does not turn the prototype into an AI
 referee or authorise cloud services, persistence/storage additions or Azure
 Boards/PAT access.
 
+### Batch 1 activation approval (2026-10-22)
+
+The user separately approved enabling board dispatch, queueing VAR-101,
+VAR-102, VAR-105 and VAR-108, resuming the existing hourly native automation
+and requesting one immediate scan. The approved shared baseline remains
+`a7d9f82983f4fc35c5a4703dfd69ffde79554240`.
+
+This authorises up to two GPT-6 Astra development workers and two GPT-6.1 Sol
+QA workers under the [delivery workflow](./docs/backlog/delivery-workflow.md).
+Actual assignments, blockers and results belong in the
+[canonical board](./docs/backlog/board.md), not inferred from available slots.
+Batch 2, marking Done, commits, pushes, remote CI and application live-model
+spending remain separately gated.
+
 ## Prototype planning
 
 - [Local status board](./docs/backlog/board.md): current status, ownership and
   blockers for all 33 work items.
 - [Board-driven delivery workflow](./docs/backlog/delivery-workflow.md): hourly
-  scheduling saved disabled, two Astra development/two Sol QA slots, guarded
+  Batch 1 scheduling approved, two Astra development/two Sol QA slots, guarded
   context handoffs and human batch approval gates.
 - [Product epic and task backlog](./docs/backlog/README.md): offside-review
   prototype scope, acceptance criteria, parallel work packages and delivery gates.
@@ -475,11 +505,10 @@ Boards/PAT access.
 Tracking remains in the repository. Azure Boards publishing is paused because
 organisation policy blocks access; no remote work items have been created.
 
-These documents remain planning artifacts and acceptance requirements.
-The T01 scaffold, isolated T02 contracts/stubs and local T03 harness/CI
-configuration have been checked within the limits above; the
-review prototype, live-model access and Azure Boards import have not been
-implemented or verified.
+These documents preserve the requirements and accepted local delivery history.
+The review prototype and one separately approved live request were verified
+within the recorded limits. Azure Boards publishing, expert/user research,
+storage and production deployment remain outside this delivery.
 
 The approved technology direction is an ASP.NET Core/C# backend on .NET 10
 with a React/TypeScript frontend, targeting one deployable application.
@@ -498,7 +527,8 @@ unverified implementation assumptions, and misleading completion reports:
   evidence, uncertainty, scope, and data-safety rules.
 - [agent-context-handoff](./.github/skills/agent-context-handoff/SKILL.md):
   compact checkpoints and coordinator-managed recovery through the claim helper.
-  Real worker launch/shutdown integration remains unverified; scheduling is paused.
+  Real worker launch/shutdown requires runtime evidence; scheduling permission
+  does not prove a safe handoff.
 - [awesome-copilot-guidance](./.github/skills/awesome-copilot-guidance/SKILL.md):
   on-demand, revision-pinned references for development, QA and tool selection.
   Agents select relevant sections rather than loading or installing the catalog.

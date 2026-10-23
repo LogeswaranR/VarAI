@@ -3,14 +3,14 @@ import { UI_HOOKS } from '../../src/contracts/ui-hooks.ts'
 
 const packages = ['VAR-102', 'VAR-103', 'VAR-104', 'VAR-106', 'VAR-107']
 const test = base.extend<{ modelFree: void }>({
-  modelFree: [async ({ page }, use) => {
+  modelFree: [async ({ page, baseURL }, use) => {
     const requests: string[] = []
     const errors: string[] = []
     page.on('request', request => requests.push(request.url()))
     page.on('pageerror', error => errors.push(error.message))
     await use()
     expect(errors).toEqual([])
-    expect(requests.every(url => new URL(url).origin === 'http://127.0.0.1:4173')).toBe(true)
+    expect(requests.every(url => new URL(url).origin === baseURL)).toBe(true)
     expect(requests.some(url => /^\/(?:api|graphql|health)(?:\/|$)/.test(new URL(url).pathname))).toBe(false)
   }, { auto: true }],
 })
