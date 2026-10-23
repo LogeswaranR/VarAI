@@ -82,13 +82,14 @@ function RequestPanel({ audience, sourceMode, ...input }: ExplanationReaderInput
   }
 
   return <>
-    <button type="button" className="rr-primary" data-testid={UI_HOOKS.explainButton}
+    <button type="button" className="rr-primary reader-generate" data-testid={UI_HOOKS.explainButton}
       disabled={!input.reviewReady || state.status === 'loading' || (state.status === 'error' && !state.error.retryable)}
       onClick={() => { void generate() }}>
       {state.status === 'error' && state.error.retryable ? 'Retry explanation' : 'Generate explanation'}
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.7" /></svg>
     </button>
-    {!input.reviewReady && <p>Complete the replay to make the evidence pack review-ready.</p>}
-    {state.status === 'idle' && input.reviewReady && <p>No explanation requested. Choose an audience and source, then generate explicitly.</p>}
+    {!input.reviewReady && <p className="reader-hint">Complete the replay to make the evidence pack review-ready.</p>}
+    {state.status === 'idle' && input.reviewReady && <p className="reader-hint">No explanation requested. Choose an audience and source, then generate explicitly.</p>}
     {state.status === 'loading' && <p role="status" data-testid={UI_HOOKS.explanationLoading}>
       Loading {sourceMode === 'AUTHORED' ? 'authored explanation' : 'Live AI explanation'}… No automatic retries.
     </p>}
@@ -140,7 +141,7 @@ function ReaderSession(input: ExplanationReaderInput) {
         </select>
       </label>
     </div>
-    <p className="source-mode-badge" data-testid={UI_HOOKS.sourceModeBadge}>{sourceMode === 'AUTHORED'
+    <p className="source-mode-badge" data-mode={sourceMode} data-testid={UI_HOOKS.sourceModeBadge}>{sourceMode === 'AUTHORED'
       ? 'Authored · supplied writing, not a model response'
       : 'Live AI · only an explicit Generate sends a request; no authored fallback'}</p>
     <RequestPanel key={`${audience}/${sourceMode}/${input.reviewReady}`} {...input} audience={audience} sourceMode={sourceMode} />

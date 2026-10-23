@@ -1,10 +1,20 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { fixture } from '../harness/fixtures'
 import { UI_HOOKS } from '../contracts/ui-hooks'
 import { Scene } from './Scene'
 
 describe('VAR-103 supplied scene', () => {
+  it('keeps a labelled accessible 2D fallback when WebGL is unavailable', () => {
+    vi.stubGlobal('WebGL2RenderingContext', undefined)
+    const scenario = fixture('S1')
+    render(<Scene diagram={scenario.diagram} visibleFacts={scenario.facts} reviewReady={true} />)
+    expect(screen.getByRole('button', { name: '3D pitch' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '2D diagram' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText(/3D is unavailable in this browser/)).toBeVisible()
+    expect(screen.getByRole('img')).toHaveAccessibleDescription(scenario.diagram.textAlternative)
+  })
+
   it.each(['S1', 'S2'] as const)('renders %s using supplied coordinates and text, without a calculated verdict', id => {
     const scenario = fixture(id)
     const before = structuredClone(scenario)

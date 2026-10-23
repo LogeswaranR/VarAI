@@ -1,11 +1,14 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createExplanationClientStub, createScenarioRepositoryStub } from '../../tests/contract-stubs/client'
 import { fixture } from './harness/fixtures'
 import { UI_HOOKS } from './contracts/ui-hooks'
 import App from './App'
 
 describe('G01 normal entry with all four real panels', () => {
+  beforeEach(() => { window.history.replaceState({}, '', '/?scenario=S1') })
+  afterEach(() => { window.history.replaceState({}, '', '/') })
+
   it('loads through fetch, replays, explicitly explains, focuses sources and resets after comparison', async () => {
     const repository = createScenarioRepositoryStub()
     const client = createExplanationClientStub()

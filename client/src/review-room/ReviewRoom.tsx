@@ -52,6 +52,10 @@ function contextValue(entry: ContextEvidenceEntry) {
   return { GOAL_AWARDED: 'Goal awarded', GOAL_CONFIRMED: 'Goal confirmed', GOAL_DISALLOWED: 'Goal disallowed' }[entry.value]
 }
 
+function teamInitials(name: string) {
+  return name.trim().split(/\s+/).map(word => word.charAt(0)).slice(0, 3).join('')
+}
+
 function ErrorNotice({ error, retry, reload }: {
   error: LoadFailure
   retry?: () => void
@@ -88,6 +92,7 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
   const run = state.replay.replayRunId
   const currentEvent = projection?.events.at(-1)
   const duration = scenario?.events.at(-1)?.offsetMs ?? 0
+  const panelKey = `${scenario?.id}/${scenario?.contentVersion}/${run}`
   function inspectSources(selection: SourceSelection) {
     if (controller.inspectSources(selection, run)) evidenceRef.current?.focus()
   }
@@ -98,8 +103,8 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
       <header className="rr-header">
         <div>
           <p className="rr-eyebrow" data-testid={UI_HOOKS.syntheticBadge}>Synthetic replay · supplied content</p>
-          <h1>Review room</h1>
-          <p>Follow the incident at your own pace. Evidence is released with each event, never inferred from an illustration.</p>
+          <h1>Review room<span className="rr-title-dot" aria-hidden="true">.</span></h1>
+          <p className="rr-intro">Replay the moment. Inspect the evidence. Understand the supplied interpretation.</p>
         </div>
         <label className="rr-scenario">Choose scenario
           <select data-testid={UI_HOOKS.scenarioSelect} value={selectedKnown ? state.selectedId ?? '' : ''}
@@ -121,27 +126,58 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
 
       {scenario && projection && <>
         <div className="rr-match" aria-label="Supplied match context">
-          <div className="rr-team"><span>Home</span><strong>{scenario.match.homeTeam}</strong></div>
+          <div className="rr-team">
+            <span className="rr-team-badge" aria-hidden="true">{teamInitials(scenario.match.homeTeam)}</span>
+            <div><span>Home</span><strong>{scenario.match.homeTeam}</strong></div>
+          </div>
           <div className="rr-score">
             <strong aria-label="Score before replay">{scenario.match.scoreBefore.home} – {scenario.match.scoreBefore.away}</strong>
             <span>Score before · {scenario.match.incidentMinute}′ incident</span>
           </div>
-          <div className="rr-team"><span>Away</span><strong>{scenario.match.awayTeam}</strong></div>
+          <div className="rr-team rr-team-away">
+            <span className="rr-team-badge" aria-hidden="true">{teamInitials(scenario.match.awayTeam)}</span>
+            <div><span>Away</span><strong>{scenario.match.awayTeam}</strong></div>
+          </div>
         </div>
 
-        <div className="rr-replay-grid">
+        <div className="rr-workspace">
+          <div className="rr-main-column">
+            <section className="rr-panel rr-scene" aria-label="Scene slot" data-testid="review-room-scene-slot" key={`scene/${panelKey}`}>
+              <div className="rr-panel-heading">
+                <span className="rr-panel-index" aria-hidden="true">01</span>
+                <div><p className="rr-kicker">The incident</p><h2>Scene</h2></div>
+                <span className="rr-tag">Illustration</span>
+              </div>
+              {Scene ? <Scene {...projection.scene} /> : <div data-testid={UI_HOOKS.scenePanel}>
+                <p className="rr-placeholder">Placeholder — scene panel not implemented.</p>
+                <p>No pitch rendering or tracking evidence is provided by this shell.</p>
+                <p data-testid={projection.illustrationRevealed && projection.scene.diagram.status === 'UNAVAILABLE'
+                  ? UI_HOOKS.missingSnapshot : undefined}>
+                  {projection.illustrationRevealed && projection.scene.diagram.status === 'ILLUSTRATIVE'
+                    ? 'Supplied illustrative input is now available to an injected scene panel.'
+                    : projection.scene.diagram.textAlternative}
+                </p>
+              </div>}
+            </section>
           <section className="rr-replay" aria-label="Replay controls and timeline">
             <p className="rr-eyebrow">Run {run} · compressed demonstration timing</p>
             <h2 data-testid="replay-stage">{currentEvent ? stageNames[currentEvent.kind] : 'Before the pass'}</h2>
             <p className="rr-stage-detail">{currentEvent?.label ?? 'Ready when you are. No event evidence has been released.'}</p>
-            <div className="rr-actions">
+            <div className="rr-actions rr-playback-actions">
               <button type="button" className="rr-primary" data-testid={UI_HOOKS.replayPlay}
                 disabled={state.replay.status === 'playing' || state.replay.status === 'complete'} onClick={controller.play}>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 10 7-10 7Z" /></svg>
                 {state.replay.status === 'paused' ? 'Resume' : 'Play'}
               </button>
               <button type="button" data-testid={UI_HOOKS.replayPause}
-                disabled={state.replay.status !== 'playing'} onClick={controller.pause}>Pause</button>
-              <button type="button" data-testid={UI_HOOKS.replayReset} onClick={controller.restart}>Restart</button>
+                disabled={state.replay.status !== 'playing'} onClick={controller.pause}>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h3v14H5Zm7 0h3v14h-3Z" /></svg>
+                Pause
+              </button>
+              <button type="button" data-testid={UI_HOOKS.replayReset} onClick={controller.restart}>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5v4h4M4.5 8a6 6 0 1 1 0 4" fill="none" stroke="currentColor" strokeWidth="1.7" /></svg>
+                Restart
+              </button>
             </div>
             <label className="rr-progress">Replay progress
               <progress value={state.replay.elapsedMs} max={duration || 1}
@@ -151,16 +187,31 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
               {' · '}{state.replay.eventCount} of {scenario.events.length} events released</p>
             <h3>Released events</h3>
             {projection.events.length === 0
-              ? <p>No events yet. Future event details are withheld.</p>
+              ? <p className="rr-empty-events">No events yet. Future event details are withheld.</p>
               : <ol className="rr-events" aria-label="Released replay events">
-                {projection.events.map(event => <li key={event.id}>
+                {projection.events.map((event, index) => <li key={event.id}
+                  aria-current={index === projection.events.length - 1 ? 'step' : undefined}>
                   <span>{(event.offsetMs / 1000).toFixed(2)}s</span>
                   <span><strong>{stageNames[event.kind]}</strong><br />{event.label}</span>
                 </li>)}
               </ol>}
           </section>
-
+          </div>
+          <div className="rr-aside-column">
+            <section className="rr-panel rr-explanation" aria-label="Explanation slot" data-testid="review-room-explanation-slot"
+              key={`explanation/${panelKey}`}>
+              <div className="rr-panel-heading">
+                <span className="rr-panel-index" aria-hidden="true">02</span>
+                <div><p className="rr-kicker">Make sense of the moment</p><h2>Explanation &amp; recap</h2></div>
+              </div>
+              {Explanation ? <Explanation scenarioId={scenario.id} contentVersion={scenario.contentVersion} replayRunId={run}
+                reviewReady={projection.reviewReady} client={client} inspectSources={inspectSources} /> : <>
+                <p className="rr-placeholder">Placeholder — explanation reader and recap not implemented.</p>
+                <p>No explanation has been requested. Playback never calls an explanation service automatically.</p>
+              </>}
+            </section>
           <section className="rr-context" aria-label="Staged decision context">
+            <p className="rr-kicker">The supplied call</p>
             <h2>Supplied context</h2>
             <p>Not yet revealed is different from missing evidence.</p>
             <dl>
@@ -180,33 +231,16 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
               ? 'Review-ready means the prototype evidence pack is available. This is not an official referee verdict.'
               : 'The original decision appears at the goal event. The supplied outcome and after-score wait until review-ready.'}</p>
           </section>
+          </div>
         </div>
 
-        <div className="rr-panels" key={`${scenario.id}/${scenario.contentVersion}/${run}`}>
-          <section className="rr-panel" aria-label="Scene slot" data-testid="review-room-scene-slot">
-            <h2>Scene</h2>
-            {Scene ? <Scene {...projection.scene} /> : <div data-testid={UI_HOOKS.scenePanel}>
-              <p className="rr-placeholder">Placeholder — scene panel not implemented.</p>
-              <p>No pitch rendering or tracking evidence is provided by this shell.</p>
-              <p data-testid={projection.illustrationRevealed && projection.scene.diagram.status === 'UNAVAILABLE'
-                ? UI_HOOKS.missingSnapshot : undefined}>
-                {projection.illustrationRevealed && projection.scene.diagram.status === 'ILLUSTRATIVE'
-                  ? 'Supplied illustrative input is now available to an injected scene panel.'
-                  : projection.scene.diagram.textAlternative}
-              </p>
-            </div>}
-          </section>
-          <section className="rr-panel" aria-label="Explanation slot" data-testid="review-room-explanation-slot">
-            <h2>Explanation &amp; recap</h2>
-            {Explanation ? <Explanation scenarioId={scenario.id} contentVersion={scenario.contentVersion} replayRunId={run}
-              reviewReady={projection.reviewReady} client={client} inspectSources={inspectSources} /> : <>
-              <p className="rr-placeholder">Placeholder — explanation reader and recap not implemented.</p>
-              <p>No explanation has been requested. Playback never calls an explanation service automatically.</p>
-            </>}
-          </section>
-          <section className="rr-panel" aria-label="Evidence slot" tabIndex={-1} ref={evidenceRef}
+        <div className="rr-panels" key={panelKey}>
+          <section className="rr-panel rr-evidence" aria-label="Evidence slot" tabIndex={-1} ref={evidenceRef} id="evidence"
             data-testid="review-room-evidence-slot">
-            <h2>Evidence</h2>
+            <div className="rr-panel-heading">
+              <span className="rr-panel-index" aria-hidden="true">03</span>
+              <div><p className="rr-kicker">Behind the interpretation</p><h2>Evidence</h2></div>
+            </div>
             {state.selectionError && <p role="alert">{state.selectionError}</p>}
             {Evidence ? <Evidence {...projection.evidence} /> : <div data-testid={UI_HOOKS.evidencePanel}>
               <p className="rr-placeholder">Placeholder — evidence navigator not implemented.</p>
@@ -216,8 +250,11 @@ export function ReviewRoom({ repository, client, slots = {}, initialScenarioId =
                 <p data-testid={UI_HOOKS.missingEvidence}>Released records explicitly mark missing evidence. No values have been guessed.</p>}
             </div>}
           </section>
-          <section className="rr-panel" aria-label="Comparison slot" data-testid="review-room-comparison-slot">
-            <h2>Controlled comparison</h2>
+          <section className="rr-panel rr-comparison" aria-label="Comparison slot" data-testid="review-room-comparison-slot">
+            <div className="rr-panel-heading">
+              <span className="rr-panel-index" aria-hidden="true">04</span>
+              <div><p className="rr-kicker">Change one thing</p><h2>Controlled comparison</h2></div>
+            </div>
             {!Comparison
               ? <div data-testid={UI_HOOKS.comparisonPanel}>
                 <p className="rr-placeholder">Placeholder — comparison panel not implemented.</p>

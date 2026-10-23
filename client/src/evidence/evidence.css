@@ -1,10 +1,14 @@
-.evidence-navigation { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; padding: 0.5rem 0; font-size: 0.8rem; }
-.evidence-navigation a { padding: 0.35rem 0; }
-.source-list { padding: 0; list-style: none; }
-.source-list > li { padding: 0.85rem; border: 1px solid #bdcbd7; border-radius: 0.4rem; margin-top: 0.65rem; }
-.source-list > li[data-selected] { background: #e2f1e9; border-left: 5px solid #17593a; }
-.source-list small { display: block; font-size: 0.8rem; color: #425666; }
-.source-list p { margin: 0.35rem 0 0.6rem; }
-.source-list > li:focus, .source-unavailable:focus { outline: 3px solid #17593a; outline-offset: 3px; }
-.missing-evidence, .source-unavailable { padding: 0.75rem; border-left: 4px solid #845600; background: #fff6df; }
+.evidence-explorer > p { color: var(--rr-muted); font-size: 0.8rem; }
+.evidence-navigation { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0; font-size: 0.65rem; }
+.evidence-navigation a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0.4rem 0.6rem; border: 1px solid #587596; border-radius: 0.4rem; background: #142438; color: #c1dbfc; text-decoration: none; font-variant-numeric: tabular-nums; }
+.evidence-navigation a:hover { background: #20364f; text-decoration: underline; }
+.review-room .source-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; padding: 0; list-style: none; }
+.source-list > li { min-width: 0; padding: 1rem; border: 1px solid var(--rr-border); border-radius: 0.55rem; background: var(--rr-inset); font-size: 0.8rem; scroll-margin-block: 1rem; }
+.source-list > li[data-source-kind="rule"] { grid-column: 1 / -1; }
+.source-list > li[data-selected] { background: #1c2d1d; border-color: #709747; border-left: 4px solid #c2f970; }
+.source-list small { display: block; font-size: 0.65rem; color: var(--rr-muted); line-height: 1.65; }
+.source-list p { margin: 0.5rem 0 0.65rem; }
+.source-list > li:focus, .source-unavailable:focus { outline: 3px solid #c2f970; outline-offset: 3px; }
+.missing-evidence, .source-unavailable { padding: 0.85rem; border-left: 3px solid #ffd791; border-radius: 0.4rem; background: #302819; color: #ffe2ae; font-size: 0.78rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 36rem) { .review-room .source-list { grid-template-columns: minmax(0, 1fr); } }

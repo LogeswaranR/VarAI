@@ -28,6 +28,7 @@ for (const scenario of ['S1', 'S2', 'S3']) test(`VAR-103 isolated ${scenario} an
   await expect(page.getByTestId(UI_HOOKS.scenePanel)).toContainText('Not yet revealed')
   await expect(page.locator('[data-marker-role]')).toHaveCount(0)
   await page.goto(url(`panel=scene&scenario=${scenario}`))
+  await page.getByRole('button', { name: '2D diagram', exact: true }).click()
   await expect(page.getByText('Synthetic · illustrative snapshot')).toBeVisible()
   await expect(page.getByRole('img')).toHaveAccessibleDescription(fixtures.find(item => item.id === scenario)!.diagram.textAlternative)
   if (scenario === 'S3') {
@@ -46,6 +47,7 @@ for (const scenario of ['S1', 'S2', 'S3']) test(`VAR-103 isolated ${scenario} an
     })).toBe(true)
     const receiver = await page.locator('[data-marker-role="RECEIVER"]').getAttribute('transform')
     await page.goto(url(`panel=scene&scenario=${scenario === 'S1' ? 'S2' : 'S1'}`))
+    await page.getByRole('button', { name: '2D diagram', exact: true }).click()
     expect(await page.locator('[data-marker-role="RECEIVER"]').getAttribute('transform')).not.toBe(receiver)
   }
 })

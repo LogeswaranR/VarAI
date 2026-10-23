@@ -17,6 +17,8 @@ const published = fileURLToPath(new URL('../artifacts/publish/', import.meta.url
 
 export default defineConfig({
   testDir: './tests/integration',
+  // The operator-gated spec needs a short decision window, so it runs under playwright.gated.config.ts with its own server.
+  testIgnore: '**/match-centre-gated.spec.ts',
   outputDir: '../artifacts/local/browser-traces',
   fullyParallel: false,
   forbidOnly: true,
