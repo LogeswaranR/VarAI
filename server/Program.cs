@@ -1,10 +1,12 @@
 using VarAI.Contracts;
 using VarAI.Scenarios;
+using VarAI.Server.Feeds;
 using VarAI.Server.Explanations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IScenarioRepository>(_ => new SyntheticScenarioRepository());
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<SyntheticMatchTimeline>();
 builder.Services.AddSingleton<IExplanationOutputValidator, ExplanationOutputValidator>();
 builder.Services.AddSingleton<IExplanationProvider>(_ =>
 {
@@ -37,6 +39,8 @@ app.MapGet("/health", () => Results.Ok(new
     schemaVersion = ContractRules.SchemaVersion
 }));
 
+SyntheticMatchEndpoints.Map(app);
+
 app.MapGraphQL("/graphql").WithOptions(options =>
 {
     options.Tool.Enable = false;
@@ -48,7 +52,7 @@ app.MapGraphQL("/graphql").WithOptions(options =>
 app.MapFallback("/api/{**path}", () => Results.Problem(
     statusCode: StatusCodes.Status404NotFound,
     title: "API route not implemented",
-    detail: "Use the approved /graphql endpoint; there is no /api/explanations compatibility API."));
+    detail: "Use /graphql for scenarios and explanations. The only /api routes are the synthetic match metadata, event, overlay and combined stream endpoints."));
 
 app.MapFallback("/graphql/{**path}", () => Results.NotFound());
 app.MapFallback("/assets/{**path}", () => Results.NotFound());
