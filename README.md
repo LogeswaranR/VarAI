@@ -3,13 +3,30 @@ An evidence-backed synthetic offside-review explainer, not an AI referee.
 
 ## Local prototype
 
-The application combines the real replay, illustrative SVG scene, evidence
-explorer, explanation reader and curated S1/S2 comparison. ASP.NET Core serves
+The application combines the real replay, illustrative 3D pitch with an accessible
+2D SVG fallback, evidence explorer, explanation reader and curated S1/S2 comparison. ASP.NET Core serves
 the synthetic scenario repository and explanation service at `/graphql`,
 using the approved [v0.2 contract](./docs/backlog/contract-v0.2.md).
 Authored explanations work without model access. Live access is disabled by
 default; an explicit Live AI request returns `MODEL_NOT_CONFIGURED`, never
 an authored fallback.
+
+The default page is a **Match centre** for a fictional 92-minute match. A seeded
+generator streams about 2,700 synthetic events with pitch coordinates; the server derives
+pass distance, difficulty and speeds, a control-vs-chaos series, and explainable moments, each
+with the rule and source events behind it. They are rendered as a clock-driven lower-third and
+also exposed as a machine-readable overlay stream (`GET /api/matches/SYN-MATCH-01/overlays`).
+Fans, analysts and studio staff get different views, with a saved favourite club and
+followed player. The disallowed-goal moment opens the evidence-backed offside review below.
+**Preview** (the default) is deterministic and English only. An optional **operator-gated mode** adds
+AI narration in English and Tamil (checked mechanically against the facts, with a labelled fallback to
+deterministic English), a human approval gate with a downloadable hash-chained decision log, and
+OpenTelemetry to Application Insights. The app can be deployed to Azure Container Apps with `azd`, using
+a managed identity and no keys. See [AI narration and approval](./docs/ai-narration-and-approval.md) and
+[Azure deployment](./docs/azure-deployment.md), which record what was measured and what was not.
+This is a synthetic-data prototype: no video, real match data or graphics-partner connection, no operator
+login, and the Tamil has not been reviewed by a native speaker. See the
+[Match centre notes](./docs/local-delivery.md#match-centre-synthetic-match-insights).
 
 **Local prototype accepted (2026-10-23):** the user accepted the integrated
 experience, scoped coverage evidence and one successful Azure live smoke.
@@ -19,6 +36,12 @@ unchanged. See the [acceptance record and limits](./docs/backlog/board.md#local-
 and [local run guide](./docs/local-delivery.md).
 The dated G00 verification sections below are historical evidence, not new
 checks or claims of production, expert or learning-study certification.
+
+The broadcast-style UI refresh adds a responsive dark review desk and a
+lazy-loaded Three.js pitch. Its short camera reveal never animates or invents
+player movement: markers remain the static supplied snapshot. Reduced motion,
+explicit 2D selection and visible rendering-failure fallbacks are supported.
+See [UI scope, validation and bundle trade-off](./docs/local-delivery.md#broadcast-ui-refresh-2026-10-23).
 
 ### Toolchain
 
@@ -128,7 +151,8 @@ ASPNETCORE_ENVIRONMENT=Production dotnet VarAI.Server.dll --urls http://127.0.0.
 
 Open `http://127.0.0.1:5075`. One .NET process serves the built React assets
 and backend; Node.js is build tooling, not a second production server.
-This is a local, framework-dependent publish, not cloud deployment.
+This is a local, framework-dependent publish. Deploying to Azure uses a container image built
+from the `Dockerfile` instead; see [Azure deployment](./docs/azure-deployment.md).
 Publishing directly without a client build fails with an explicit instruction
 to build it first.
 
