@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "foundrySubscriptionId": { "value": "${AZURE_FOUNDRY_SUBSCRIPTION_ID=}" },
+    "foundryResourceGroupName": { "value": "${AZURE_FOUNDRY_RESOURCE_GROUP=}" },
+    "foundryAccountName": { "value": "${AZURE_FOUNDRY_ACCOUNT=}" },
+    "azureOpenAiEndpoint": { "value": "${AZURE_OPENAI_ENDPOINT=}" },
+    "modelDeploymentName": { "value": "${AZURE_OPENAI_DEPLOYMENT=gpt-6-luna}" },
+    "narrationEnabled": { "value": "${NARRATION_ENABLED=true}" },
+    "gateSlaSeconds": { "value": "${GATE_SLA_SECONDS=20}" },
+    "narrationMaxModelCalls": { "value": "${NARRATION_MAX_MODEL_CALLS=160}" },
+    "narrationReasoningEffort": { "value": "${NARRATION_REASONING_EFFORT=low}" },
+    "webImageName": { "value": "${SERVICE_WEB_IMAGE_NAME=}" },
+    "operatorPrincipalId": { "value": "${AZURE_OPERATOR_PRINCIPAL_ID=}" }
+  }
+}

@@ -16,3 +16,4 @@ client/playwright-report/
 .env.*
 !.env.example
 server/appsettings.Local.json
+.azure/
