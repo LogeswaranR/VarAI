@@ -137,6 +137,7 @@ streams a rendering partner would read.
 | `GET …/events` | Server-Sent Events: `match`, raw `event` records (with `metrics`), `complete` |
 | `GET …/overlays` | Server-Sent Events: `match`, versioned `overlay` cues (overlay schema 1.0), `complete` |
 | `GET …/stream` | Everything above plus `momentum` samples as one ordered sequence |
+| `GET …/live` | Incrementally computed events, momentum and cues; no future highlights or operator approval |
 
 The feed envelope is `{ schemaVersion: "2.0", type, payload }`. Query `speed`
 (1–1000 match-seconds per real second; server default 120, UI default 60) and
@@ -144,6 +145,64 @@ The feed envelope is `{ schemaVersion: "2.0", type, payload }`. Query `speed`
 state is complete). `Last-Event-ID` resumes by item index. Invalid parameters
 return 400, unknown matches 404, and `/api` never falls back to SPA HTML. The
 GraphQL v0.2 scenario and explanation contract is unchanged.
+
+### Incremental live simulation
+
+Preview now offers **Incremental live simulation**, off by default. This uses
+`/live`, not the precomputed timeline. `IncrementalMatchProcessor` consumes
+one raw synthetic event at a time, derives its metrics, maintains cue cooldowns
+and score state, and computes momentum at closed minute boundaries.
+It reuses the same interpretation rules as replay; it does not rerun a
+whole-match analysis for each incoming event.
+
+The synthetic generator still constructs a seeded raw dataset. That dataset is
+the simulated producer, not a real match connection or a public event-upload API.
+The processor does not receive the unconsumed suffix. Future review outcomes
+are absent from live metadata and the UI hides the curated jump chips.
+
+Two intentional differences from replay prevent future leakage:
+
+- A hard pass cannot bypass its cooldown merely because it will become an assist.
+  Its contribution can still be explained later, when a goal arrives.
+- A fast shot is not suppressed because a goal follows it. A later goal cue can
+  supersede the lower-priority shot cue through the existing presentation rules.
+
+Live cue IDs use `-LIVE-OV-`; the overlay schema remains 1.0 in feed envelope 2.0.
+The `X-VarAI-Processing` response header distinguishes `incremental` from
+`precomputed-replay`. The Studio panel points to the correct feed.
+The live endpoint supports the same `speed` and `fromSeconds` bounds and
+`Last-Event-ID`. Resume reconstructs the deterministic prefix without sending it
+again and paces the suffix from the resume point. Invalid IDs fail before SSE
+headers are sent. Completion totals count actual emitted live cues, not replay
+cues.
+
+Use **Start live simulation** at 1x or a faster demo speed. **Full-time recap**
+can also catch up through this incremental path. Switching back to replay or
+operator-gated mode closes and clears the old stream. Live simulation calls no
+model and cannot be combined with a gated replay session.
+
+The supported processor input is ordered, append-only events for this synthetic
+match. Duplicate IDs, skipped sequences, backwards events and arrivals at an
+already closed clock boundary throw explicit errors. Late-event correction,
+external ingestion, durable state, multi-match scaling and live-mode AI approval
+are not implemented. No production latency or throughput guarantee is claimed.
+
+Validation for the incremental pass (2026-10-23; live models disabled):
+
+| Check | Result |
+| --- | --- |
+| Filtered server tests: Feeds, Narration, Gate and SyntheticMatchStream | 196 passed |
+| Causal invariance | Identical output from truncated prefixes at four clock boundaries; changing future goals/reviews did not change earlier output |
+| Stream correctness | Ordered IDs, batch-equivalent metrics/momentum, actual cue totals, exact resume suffix, invalid cursor rejection and explicit input-order failures passed |
+| `npm run test:client -- src/match-centre` | 319 passed |
+| TypeScript checking, client ESLint, C# format verification, `npm run publish` | Passed; existing Three.js bundle advisory remains |
+| `npm run test:integration -- match-centre.spec.ts` | 8 passed at 375 px and 1280 px, including a complete 600x incremental match, recap, Studio endpoint and return to replay |
+| Gated Playwright configuration | 4 passed, preserving approval, override, hold and log behavior |
+
+The first emitted event consumed only one producer event in the lazy-processing
+test. These checks establish causal output for the tested synthetic feed, not a
+production throughput benchmark. No paid calls, cloud deployment or new
+dependencies were needed. The broader repository suite was not rerun.
 
 ### Metric definitions
 
@@ -197,8 +256,11 @@ graphics-rendering partner or validated against one.
 
 ### Audience views
 
-- **Fan:** headline and "why it matters", emphasis on the chosen club, a rail
-  following the chosen player, and a plain control-vs-chaos gauge.
+- **Fan:** a visual scoreboard, event map, match-progress rail, followed-player
+  shirt and three headline stats, plus a control-vs-chaos gauge and trend chart.
+  Six recent moments are shown, with the newest explanation expanded;
+  **Earlier moments** reveals older cues and **How we know** reveals their
+  explanations, rules and source buttons.
 - **Analyst:** control-vs-chaos chart, team metrics (accuracy, distance,
   difficulty, sprints, shots, top speeds), every cue with its metrics and rule,
   source buttons that ring the cited events on the pitch, and the raw event feed.
@@ -206,6 +268,74 @@ graphics-rendering partner or validated against one.
   downloadable cue sheet.
 
 Player statistics count only events tagged with that player's ID.
+The map's numbered marker is the last event's actor at its start coordinate;
+the white dot is its end coordinate, not tracked ball motion. Period and review
+markers do not move that dot. Brief action animations respect reduced motion.
+
+**Personalise** expands club, player and English/Tamil preferences. **Playback
+options & guide** contains the Preview/Operator-gated mode selector, incremental-simulation switch and technical
+playback notes. Neither opens a stream or calls a model. The active processing
+mode, narration availability, synthetic-data label and error states remain
+visible. Map legends, rhythm methodology and simulation limits are expandable;
+operator decisions and provenance labels are not hidden by this refresh.
+
+### Automatic match recaps
+
+The Match Centre now synthesizes a viewer recap from **received events only**:
+the current result, goal reversals, the equaliser when applicable, team activity,
+first-half versus second-half ball-action share, and the followed player's tagged
+contribution. Fan wording emphasizes the chosen club, Analyst wording includes
+pass completion and shots, and Studio omits the personal player paragraph.
+Ball-action share is explicitly not possession time or chance quality.
+
+- The recap updates during play. **Half-time snapshot** freezes period 1,
+  excluding second-half events even at the same timestamp.
+- The result is shown first; **Full story** reveals the remaining paragraphs
+  (expanded by default for Analyst). The JSON export retains the full recap.
+- **Full-time recap** in Preview uses the existing stream's catch-up mechanism.
+  It fetches all events and requires a matching completion count, final-period
+  event and score before calling the result full-time. Interrupted runs remain
+  partial snapshots. Catch-up cues are history, so this button does not put
+  old moments on air.
+- **Download recap JSON** exports schema 1.0, checkpoint, audience, score,
+  story and turning-point claims with source IDs and time window. Evidence
+  buttons display up to the last eight cited events on the pitch; the download
+  retains every cited ID.
+- Recaps are **deterministic English**, not AI-written, translated or
+  operator-approved. In gated mode they use only the delayed program events,
+  remain viewer summaries and never enter the program overlay feed. Tamil
+  selection displays an explicit English-only recap notice.
+
+The Preview controls suggest a short demo: jump to a goal, compare the audience
+views, then open Full-time recap. AI cue narration still requires a separate
+operator-gated run with narration enabled; no model is invoked by a recap.
+
+Pass and sprint explanations now distinguish retention, forward gain and
+final-third position from raw difficulty/speed. Sideways/backward actions are
+not described as forward gains; difficulty is not a success probability.
+These remain transparent heuristics, not expert-validated tactical judgments.
+
+The default replay and operator-gated paths still use precomputed match
+intelligence. The separate **Incremental live simulation** path above now
+computes intelligence from incoming synthetic events. The recap uses the
+received-event boundary in either path. No new paid service, model call or
+Azure deployment is required for these improvements.
+
+Validation for this bounded recap/context pass (2026-10-23, model access off):
+
+| Check | Result |
+| --- | --- |
+| `npm run test:client -- src/match-centre` | 316 passed, including recap prefix invariance, halftime isolation, reversed goals, missing metrics and audience/export behavior |
+| Filtered server tests: Feeds, Narration, Gate and SyntheticMatchStream | 183 passed, including forward/sideways context and preserving rejection of invented goals |
+| `npm run typecheck`, `npm run lint:client`, `dotnet format VarAI.slnx --verify-no-changes --no-restore` | Passed |
+| `npm run publish` | Passed; the existing Three.js chunk-size advisory remains |
+| `npm run test:integration -- match-centre.spec.ts` (43170/43171) | 6 passed across 375 px and 1280 px, including full-time catch-up, frozen halftime, export, evidence links and no horizontal overflow |
+| `npx playwright test --config playwright.gated.config.ts` from `client` (43170) | 4 passed: preview separation, approval, Tamil operator override, automatic hold and log download |
+| `git diff --check` | Passed |
+
+No paid model calls, native-language review, new Azure deployment or complete
+repository-wide test run was performed for this pass. Existing live-model
+measurements predate the new cue wording and do not validate it.
 
 ### Operator-gated mode (AI narration and approval)
 

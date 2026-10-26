@@ -18,6 +18,20 @@ with the rule and source events behind it. They are rendered as a clock-driven l
 also exposed as a machine-readable overlay stream (`GET /api/matches/SYN-MATCH-01/overlays`).
 Fans, analysts and studio staff get different views, with a saved favourite club and
 followed player. The disallowed-goal moment opens the evidence-backed offside review below.
+The visual-first Fan view shows a score panel, event map, player spotlight and six recent
+moments; explanations, older moments and technical notes expand on demand.
+Use **Personalise** for club, player and language choices.
+In Preview, **Playback options & guide → Incremental live simulation** opts into a separate causal pipeline: metrics,
+rolling momentum and cues are computed as raw synthetic events are consumed, without
+future-goal or review knowledge. It supports 1x and accelerated playback and exposes
+`GET /api/matches/SYN-MATCH-01/live`. The seeded raw dataset remains simulated;
+this is not a connection to real match data. Curated replay and operator-gated AI
+narration remain separate, unchanged paths.
+An automatic **match recap** synthesizes the received score changes, overturned goals, equaliser,
+team activity and selected player's contribution. It has a frozen halftime snapshot, audience-specific
+wording and downloadable evidence-linked JSON. **Full-time recap** in Preview catches up through the
+whole match without model calls. Recaps are deterministic English viewer summaries, not AI narration
+or operator-approved broadcast cues.
 **Preview** (the default) is deterministic and English only. An optional **operator-gated mode** adds
 AI narration in English and Tamil (checked mechanically against the facts, with a labelled fallback to
 deterministic English), a human approval gate with a downloadable hash-chained decision log, and

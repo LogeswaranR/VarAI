@@ -74,6 +74,8 @@ async function setup(options: {
   const view = render(<MatchCentre streamClient={{ connect }} gateClient={gate.client} storage={storage.api} clock={() => time.now}
     loadMetadata={options.loadMetadata ?? (async () => metadata)} />)
   await screen.findByTestId('scorebug')
+  fireEvent.click(screen.getByText('Personalise'))
+  fireEvent.click(screen.getByText('Playback options & guide'))
   vi.useFakeTimers()
   const settle = async (ms = 60) => { await act(async () => { await vi.advanceTimersByTimeAsync(ms) }) }
   const deliver = async (...messages: MatchStreamMessage[]) => {

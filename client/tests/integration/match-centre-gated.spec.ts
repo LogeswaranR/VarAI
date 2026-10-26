@@ -25,6 +25,7 @@ async function readAll(stream: Readable | null) {
 
 test('Preview mode still has no approval interface and no narration', async ({ page }) => {
   await page.goto('/')
+  await page.getByText('Playback options & guide', { exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Match centre', level: 1 })).toBeVisible()
   await expect(page.getByRole('radio', { name: /Preview/ })).toBeChecked()
   await expect(page.getByTestId('mode-note')).toHaveText('Preview - deterministic rules only, not operator-approved')
@@ -32,6 +33,7 @@ test('Preview mode still has no approval interface and no narration', async ({ p
   await expect(page.getByRole('heading', { name: 'Operator desk' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: LOG_LINK })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Jump to 66:00' })).toHaveCount(0)
+  await page.getByText('Personalise', { exact: false }).click()
   await expect(page.getByRole('radio', { name: 'தமிழ்' })).toBeDisabled()
   await expect(page.getByText('Tamil narration is available in operator-gated mode')).toBeVisible()
 
@@ -50,6 +52,8 @@ test('Operator-gated mode: approve one cue, override another in Tamil, leave the
   page.on('console', message => { if (message.type() === 'error') problems.push(`console error: ${message.text()}`) })
 
   await page.goto('/')
+  await page.getByText('Personalise', { exact: false }).click()
+  await page.getByText('Playback options & guide', { exact: true }).click()
   await page.getByRole('radio', { name: /Operator-gated/ }).check()
   await expect(page.getByTestId('narration-status')).toHaveText('AI narration: off - deterministic English only')
   await expect(page.getByTestId('mode-note')).toContainText('(20 s)')

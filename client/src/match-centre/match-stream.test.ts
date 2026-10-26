@@ -63,6 +63,16 @@ function handlers() {
 }
 
 describe('match stream client', () => {
+  it('uses the causal endpoint only when opted in, and cannot mix it with an approval session', () => {
+    const { source } = fakeSource()
+    const create = vi.fn(() => source)
+    const { value } = handlers()
+    createMatchStreamClient(create).connect({ speed: 1, fromSeconds: 0, incremental: true }, value)
+    expect(create).toHaveBeenCalledWith('/api/matches/SYN-MATCH-01/live?speed=1&fromSeconds=0')
+    expect(() => createMatchStreamClient(create).connect({ speed: 1, fromSeconds: 0, incremental: true, sessionId: SESSION_ID }, value))
+      .toThrow('cannot use an operator-gated replay session')
+  })
+
   it('requests the chosen speed and start point and forwards validated messages in order', () => {
     resetSequence()
     const { source, send } = fakeSource()

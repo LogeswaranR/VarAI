@@ -149,6 +149,36 @@ public sealed class SyntheticMatchStreamHttpTests
     }
 
     [TestMethod]
+    public async Task LiveStreamProcessesCausallyWithoutHighlightsAndResumesTheExactSuffix()
+    {
+        using var application = Application();
+        using var client = application.CreateClient();
+        using var response = await client.GetAsync(Url("live", "?speed=1000&fromSeconds=5520"), TestContext.CancellationToken);
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual("incremental", response.Headers.GetValues("X-VarAI-Processing").Single());
+        var messages = await ReadMessagesAsync(response, TestContext.CancellationToken);
+        Assert.AreEqual(0, messages[0].Payload.GetProperty("highlights").GetArrayLength());
+        Assert.AreEqual("complete", messages[^1].Type);
+        Assert.AreEqual(messages.Count(message => message.Type == "overlay"), messages[^1].Payload.GetProperty("overlayCount").GetInt32());
+        CollectionAssert.AreEqual(Enumerable.Range(0, messages.Count).ToArray(), messages.Select(message => message.Id).ToArray());
+
+        var after = messages.Count - 5;
+        using var request = new HttpRequestMessage(HttpMethod.Get, Url("live", "?speed=1000&fromSeconds=5520"));
+        request.Headers.TryAddWithoutValidation("Last-Event-ID", after.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        using var resumedResponse = await client.SendAsync(request, TestContext.CancellationToken);
+        var resumed = await ReadMessagesAsync(resumedResponse, TestContext.CancellationToken);
+        Assert.AreEqual(after, resumed[0].Id);
+        CollectionAssert.AreEqual(messages.Skip(after + 1).Select(message => message.Id).ToArray(), resumed.Skip(1).Select(message => message.Id).ToArray());
+        CollectionAssert.AreEqual(messages.Skip(after + 1).Select(message => message.Payload.GetRawText()).ToArray(),
+            resumed.Skip(1).Select(message => message.Payload.GetRawText()).ToArray());
+
+        using var invalidRequest = new HttpRequestMessage(HttpMethod.Get, Url("live"));
+        invalidRequest.Headers.TryAddWithoutValidation("Last-Event-ID", "999999");
+        using var invalidResponse = await client.SendAsync(invalidRequest, TestContext.CancellationToken);
+        Assert.AreEqual(HttpStatusCode.BadRequest, invalidResponse.StatusCode);
+    }
+
+    [TestMethod]
     [DataRow("events", "?speed=0")]
     [DataRow("events", "?speed=fast")]
     [DataRow("overlays", "?speed=1001")]
@@ -156,6 +186,8 @@ public sealed class SyntheticMatchStreamHttpTests
     [DataRow("stream", "?fromSeconds=-1")]
     [DataRow("stream", "?fromSeconds=abc")]
     [DataRow("stream", "?fromSeconds=6000")]
+    [DataRow("live", "?speed=NaN")]
+    [DataRow("live", "?fromSeconds=-1")]
     public async Task RejectsInvalidPlaybackParametersWithoutStreaming(string route, string query)
     {
         using var application = Application();
@@ -173,7 +205,7 @@ public sealed class SyntheticMatchStreamHttpTests
         using var application = Application();
         using var client = application.CreateClient();
 
-        foreach (var route in new[] { "", "/events", "/overlays", "/stream" })
+        foreach (var route in new[] { "", "/events", "/overlays", "/stream", "/live" })
         {
             using var unknown = await client.GetAsync($"/api/matches/OTHER{route}", TestContext.CancellationToken);
             Assert.AreEqual(HttpStatusCode.NotFound, unknown.StatusCode, route);

@@ -101,6 +101,11 @@ public static class SyntheticMatchGenerator
 
     public static string TeamName(string teamId) => teamId == HomeTeamId ? HomeTeam.Name : AwayTeam.Name;
 
+    public static SyntheticMatchMetadata Describe(IReadOnlyList<Highlight>? highlights = null) => new(
+        MatchId, new PitchSpec(PitchLength, PitchWidth),
+        [new PeriodSpec(1, 0, FirstPeriodEndMs), new PeriodSpec(2, FirstPeriodEndMs, MatchEndMs)],
+        MatchEndMs, new Score(0, 0), HomeTeam, AwayTeam, highlights ?? [], DefaultSeed, true);
+
     public static GeneratedMatch Generate(long seed = DefaultSeed)
     {
         var buffer = new DraftBuffer();

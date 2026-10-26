@@ -35,15 +35,7 @@ public sealed class SyntheticMatchTimeline
         var analysis = MatchInsightEngine.Analyze(Events);
         Momentum = analysis.Momentum;
         Overlays = analysis.Cues;
-        Metadata = new SyntheticMatchMetadata(
-            MatchId,
-            new PitchSpec(SyntheticMatchGenerator.PitchLength, SyntheticMatchGenerator.PitchWidth),
-            [
-                new PeriodSpec(1, 0, SyntheticMatchGenerator.FirstPeriodEndMs),
-                new PeriodSpec(2, SyntheticMatchGenerator.FirstPeriodEndMs, SyntheticMatchGenerator.MatchEndMs),
-            ],
-            SyntheticMatchGenerator.MatchEndMs, new Score(0, 0), generated.HomeTeam, generated.AwayTeam,
-            analysis.Highlights, SyntheticMatchGenerator.DefaultSeed, true);
+        Metadata = SyntheticMatchGenerator.Describe(analysis.Highlights);
         FinalScore = Events.Last(item => item.ScoreAfter is not null).ScoreAfter!;
         Complete = new MatchComplete(MatchId, Events.Count, Momentum.Count, Overlays.Count, FinalScore);
         Items = BuildItems();

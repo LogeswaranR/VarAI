@@ -19,6 +19,9 @@ public static class SyntheticMatchEndpoints
         routes.MapGet("/api/matches/{matchId}/stream",
             (string matchId, HttpContext context, SyntheticMatchTimeline timeline, TimeProvider time) =>
                 StreamAsync(matchId, context, timeline, time, events: true, momentum: true, overlays: true));
+        routes.MapGet("/api/matches/{matchId}/live",
+            (string matchId, HttpContext context, TimeProvider time) =>
+                StreamAsync(matchId, context, null, time, events: true, momentum: true, overlays: true));
     }
 
     private static IResult GetMetadata(string matchId, SyntheticMatchTimeline timeline) =>
@@ -27,7 +30,7 @@ public static class SyntheticMatchEndpoints
             : Results.NotFound();
 
     private static async Task StreamAsync(
-        string matchId, HttpContext context, SyntheticMatchTimeline timeline, TimeProvider time,
+        string matchId, HttpContext context, SyntheticMatchTimeline? timeline, TimeProvider time,
         bool events, bool momentum, bool overlays)
     {
         if (!StringComparer.Ordinal.Equals(matchId, SyntheticMatchTimeline.MatchId))
@@ -49,7 +52,7 @@ public static class SyntheticMatchEndpoints
         var fromSeconds = 0;
         if (query.TryGetValue("fromSeconds", out var fromText) &&
             (!int.TryParse(fromText.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out fromSeconds) ||
-             fromSeconds > timeline.Metadata.DurationMs / 1000))
+             fromSeconds > SyntheticMatchGenerator.MatchEndMs / 1000))
         {
             await RejectAsync(context, "fromSeconds must be a match-clock second within the match.");
             return;
@@ -59,26 +62,65 @@ public static class SyntheticMatchEndpoints
         var afterIndex = 0;
         if (lastEventId.Length > 0 &&
             (!int.TryParse(lastEventId, NumberStyles.None, CultureInfo.InvariantCulture, out afterIndex) ||
-             !timeline.CanResumeFrom(afterIndex)))
+             (timeline is not null && !timeline.CanResumeFrom(afterIndex))))
         {
             await RejectAsync(context, "Last-Event-ID must be an item ID from this synthetic stream.");
             return;
         }
 
         var cancellationToken = context.RequestAborted;
+        using var liveItems = timeline is null
+            ? IncrementalMatchProcessor.Process(SyntheticMatchGenerator.Generate().Events).GetEnumerator()
+            : null;
+        var resumeMs = fromSeconds * 1000;
+        if (liveItems is not null)
+        {
+            for (var skipped = 0; skipped < afterIndex; skipped++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!liveItems.MoveNext())
+                {
+                    await RejectAsync(context, "Last-Event-ID must be an item ID from this live synthetic stream.");
+                    return;
+                }
+
+                resumeMs = Math.Max(resumeMs, liveItems.Current.TimeMs);
+            }
+        }
+
         context.Response.StatusCode = StatusCodes.Status200OK;
         context.Response.ContentType = "text/event-stream";
         context.Response.Headers.CacheControl = "no-cache, no-transform";
         context.Response.Headers["X-Accel-Buffering"] = "no";
+        context.Response.Headers["X-VarAI-Processing"] = timeline is null ? "incremental" : "precomputed-replay";
 
         try
         {
             await context.Response.StartAsync(cancellationToken);
-            await WriteAsync(context, afterIndex, MatchStreamKinds.Match, timeline.Metadata, cancellationToken);
-            var options = new StreamOptions(speed, fromSeconds * 1000, afterIndex, events, momentum, overlays);
-            await foreach (var item in timeline.StreamAsync(options, time, cancellationToken))
+            await WriteAsync(context, afterIndex, MatchStreamKinds.Match, timeline?.Metadata ?? SyntheticMatchGenerator.Describe(), cancellationToken);
+            if (liveItems is not null)
             {
-                await WriteAsync(context, item.Index, item.Kind, item.Payload, cancellationToken);
+                var started = time.GetTimestamp();
+                while (liveItems.MoveNext())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var item = liveItems.Current;
+                    var due = TimeSpan.FromMilliseconds(Math.Max(0, item.TimeMs - resumeMs) / speed);
+                    while (due - time.GetElapsedTime(started) is { } wait && wait > TimeSpan.Zero)
+                    {
+                        await Task.Delay(wait, time, cancellationToken);
+                    }
+
+                    await WriteAsync(context, item.Index, item.Kind, item.Payload, cancellationToken);
+                }
+            }
+            else if (timeline is not null)
+            {
+                var options = new StreamOptions(speed, fromSeconds * 1000, afterIndex, events, momentum, overlays);
+                await foreach (var item in timeline.StreamAsync(options, time, cancellationToken))
+                {
+                    await WriteAsync(context, item.Index, item.Kind, item.Payload, cancellationToken);
+                }
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

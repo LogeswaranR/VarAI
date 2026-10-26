@@ -7,6 +7,7 @@ import type { AudienceProfile } from './profile'
 function setup(profile: AudienceProfile, languageEnabled: boolean) {
   const handlers = { onPersona: vi.fn(), onClub: vi.fn(), onPlayer: vi.fn(), onLanguage: vi.fn() }
   render(<ProfileBar metadata={metadata} profile={profile} languageEnabled={languageEnabled} {...handlers} />)
+  fireEvent.click(screen.getByText('Personalise'))
   return handlers
 }
 

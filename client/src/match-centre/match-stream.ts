@@ -108,6 +108,8 @@ export function parseMatchStreamMessage(raw: string, gated = false): MatchStream
 export interface MatchStreamOptions {
   readonly speed: number
   readonly fromSeconds: number
+  /** Opt-in causal processing; the default remains the curated replay. */
+  readonly incremental?: boolean
   /** When set, the stream is the operator-gated program feed of that session; speed and start are the session's own. */
   readonly sessionId?: string
 }
@@ -138,6 +140,7 @@ export function createMatchStreamClient(
     connect(options, handlers) {
       const { sessionId } = options
       const gated = sessionId !== undefined
+      if (gated && options.incremental) throw new Error('Incremental simulation cannot use an operator-gated replay session.')
       if (gated && !SESSION_ID_PATTERN.test(sessionId)) {
         throw new Error('The operator-gated session identifier is not valid.')
       }
@@ -146,7 +149,7 @@ export function createMatchStreamClient(
       }
       const source = createSource(gated
         ? `/api/matches/${MATCH_ID}/sessions/${sessionId}/program`
-        : `/api/matches/${MATCH_ID}/stream?speed=${options.speed}&fromSeconds=${Math.max(0, Math.floor(options.fromSeconds))}`)
+        : `/api/matches/${MATCH_ID}/${options.incremental ? 'live' : 'stream'}?speed=${options.speed}&fromSeconds=${Math.max(0, Math.floor(options.fromSeconds))}`)
       let metadata: MatchMetadata | null = null
       let lastSequence = 0
       let closed = false

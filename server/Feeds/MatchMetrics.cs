@@ -47,7 +47,7 @@ public static class MatchMetrics
     public static double AttackingGoalX(string teamId) =>
         teamId == SyntheticMatchGenerator.HomeTeamId ? SyntheticMatchGenerator.PitchLength : 0.0;
 
-    private static EventMetrics? ComputeFor(IReadOnlyList<SyntheticMatchEvent> events, int index)
+    internal static EventMetrics? ComputeFor(IReadOnlyList<SyntheticMatchEvent> events, int index)
     {
         var item = events[index];
         if (item.EndX is null || item.EndY is null)

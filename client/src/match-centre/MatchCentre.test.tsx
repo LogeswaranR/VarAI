@@ -44,12 +44,28 @@ const play = () => fireEvent.click(screen.getByRole('button', { name: 'Kick off'
 afterEach(() => { vi.useRealTimers() })
 
 describe('MatchCentre', () => {
+  it('opts into live processing and restores replay controls and speed without mixing streams', async () => {
+    const { connect, close } = await setup()
+    fireEvent.click(screen.getByText('Playback options & guide'))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Incremental live simulation' }))
+    fireEvent.change(screen.getByLabelText('Speed'), { target: { value: '1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Start live simulation' }))
+    expect(connect).toHaveBeenLastCalledWith({ speed: 1, fromSeconds: 0, incremental: true }, expect.any(Object))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Incremental live simulation' }))
+    expect(close).toHaveBeenCalled()
+    expect(screen.getByLabelText('Speed')).toHaveValue('60')
+    expect(screen.getByRole('button', { name: /67:21 · AVC goal/ })).toBeVisible()
+    play()
+    expect(connect).toHaveBeenLastCalledWith({ speed: 60, fromSeconds: 0 }, expect.any(Object))
+  })
+
   it('describes the match first and starts nothing until the viewer asks', async () => {
     const { connect } = await setup()
 
     expect(screen.getByRole('heading', { name: 'Match centre', level: 1 })).toBeVisible()
     expect(screen.getByTestId('synthetic-badge')).toHaveTextContent('generated, not real data')
     expect(screen.getByTestId('match-status')).toHaveTextContent('Nothing plays until you start it')
+    fireEvent.click(screen.getByText('Personalise'))
     expect(within(screen.getByLabelText('Favourite club')).getAllByRole('option')).toHaveLength(2)
     expect(within(screen.getByLabelText('Follow a player')).getAllByRole('option')).toHaveLength(22)
     expect(screen.getByTestId('scoreline')).toHaveTextContent('0 – 0')
@@ -95,7 +111,7 @@ describe('MatchCentre', () => {
     expect(screen.getByTestId('player-stats')).toHaveTextContent('Involvements1')
     expect(screen.getByText('Why it matters')).toBeVisible()
     expect(screen.queryByRole('heading', { name: 'Team metrics' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('img', { name: /Control index by minute/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Control index by minute/ })).toBeVisible()
 
     fireEvent.click(screen.getByRole('radio', { name: /Analyst/ }))
     expect(screen.getByRole('heading', { name: 'Team metrics' })).toBeVisible()
@@ -112,7 +128,7 @@ describe('MatchCentre', () => {
     expect(screen.getByRole('heading', { name: 'On air' })).toBeVisible()
     expect(screen.getByTestId('on-air-state')).toHaveTextContent('ON AIR')
     expect(screen.getByTestId('on-air-title')).toHaveTextContent('JASPER QUILL · #7')
-    expect(screen.queryByRole('img', { name: /Control index by minute/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Control index by minute/ })).toBeVisible()
     expect(screen.queryByTestId('player-stats')).not.toBeInTheDocument()
     expect(screen.queryByTestId('moment-card')).not.toBeInTheDocument()
   })
@@ -120,6 +136,7 @@ describe('MatchCentre', () => {
   it('remembers persona, club and player on this device and repairs nothing it did not store', async () => {
     const storage = memoryStorage()
     const { view } = await setup({ storage })
+    fireEvent.click(screen.getByText('Personalise'))
     fireEvent.click(screen.getByRole('radio', { name: /Analyst/ }))
     fireEvent.change(screen.getByLabelText('Favourite club'), { target: { value: 'LANTERNS' } })
     expect(screen.getByLabelText<HTMLSelectElement>('Follow a player').value).toBe('LANTERNS-09')

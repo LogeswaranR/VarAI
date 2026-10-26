@@ -12,7 +12,7 @@ function App() {
   const mainId = review ? 'review' : 'match-centre'
   return <>
     <a className="skip-link" href={`#${mainId}`}>{review ? 'Skip to review room' : 'Skip to match centre'}</a>
-    <header className="app-header">
+    <header className={`app-header${review ? '' : ' app-header-match'}`}>
       <div className="app-header-inner">
         <a className="app-brand" href="/">
           <svg viewBox="0 0 36 40" aria-hidden="true"><path d="M2 4h9l7 19L26 4h9L20 37h-5Z" /></svg>

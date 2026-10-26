@@ -96,6 +96,46 @@ public sealed class MatchInsightEngineTests
     }
 
     [TestMethod]
+    public void ProgressExplanationsDistinguishSpeedFromForwardGain()
+    {
+        var carry = Timeline.Events.First(item => item.EventType == MatchEventTypes.Carry && item.Metrics is
+        { Sprint: true, DistanceM: >= MatchInsightEngine.SprintMinimumDistanceM });
+        var forward = MatchInsightEngine.Analyze([carry with
+        {
+            Metrics = carry.Metrics! with { ForwardM = 24.5, FinalThird = true }
+        }]).Cues.Single(cue => cue.Kind == OverlayKinds.SprintCarry);
+        Assert.Contains("24.5 m in the attacking direction", forward.WhyItMatters);
+        Assert.Contains("finishing in the final third", forward.WhyItMatters);
+
+        var backward = MatchInsightEngine.Analyze([carry with
+        {
+            Metrics = carry.Metrics! with { ForwardM = -4 }
+        }]).Cues.Single(cue => cue.Kind == OverlayKinds.SprintCarry);
+        Assert.Contains("no forward progress", backward.WhyItMatters);
+        Assert.DoesNotContain("Advances", backward.WhyItMatters);
+    }
+
+    [TestMethod]
+    public void PassExplanationsDescribeRetentionAndProgressNotProbability()
+    {
+        var pass = Timeline.Events.First(item => item.EventType == MatchEventTypes.Pass && item.Outcome == "COMPLETE" &&
+            item.Metrics is { Difficulty: >= MatchInsightEngine.HardPassDifficulty, UnderPressure: true, FinalThird: true });
+        var forward = MatchInsightEngine.Analyze([pass with
+        {
+            Metrics = pass.Metrics! with { ForwardM = 22.8 }
+        }]).Cues.Single(cue => cue.Kind == OverlayKinds.HardPass);
+        Assert.Contains("Retains the ball under pressure", forward.WhyItMatters);
+        Assert.Contains("22.8 m in the attacking direction", forward.WhyItMatters);
+        Assert.Contains("not a success probability", forward.WhyItMatters);
+
+        var sideways = MatchInsightEngine.Analyze([pass with
+        {
+            Metrics = pass.Metrics! with { ForwardM = 0 }
+        }]).Cues.Single(cue => cue.Kind == OverlayKinds.HardPass);
+        Assert.Contains("without gaining ground", sideways.WhyItMatters);
+    }
+
+    [TestMethod]
     public void TheDisallowedGoalLinksTheMatchStreamToTheSuppliedReviewScenario()
     {
         var events = Timeline.Events.ToDictionary(item => item.EventId, StringComparer.Ordinal);

@@ -212,13 +212,14 @@ that path contains the full session ID, so treat the telemetry resource as sensi
 
 ## Match Centre UI
 
-The page opens in **Preview**, which is the unchanged deterministic stream, labelled "Preview - deterministic rules only,
-not operator-approved". The **Operator-gated** mode switch uses the routes above:
+The page opens in **Preview**, which is the unchanged deterministic stream. A compact label keeps the current replay/live
+processing mode and lack of approval visible. Expand **Playback options & guide** for the full provenance note and
+the **Operator-gated** mode switch, which uses the routes above:
 
 - **Session.** *Start gated run* creates a session at the chosen speed (1, 2, 5 or 10×; default 10×); *Jump to 66:00* starts a new
   session at that match time; *Stop* closes both streams (the session stays on the server until it expires). A person must start
   every session.
-- **Language.** English or தமிழ் (Tamil text is marked `lang="ta"`). The choice is available only in gated mode, because Preview
+- **Language.** Expand **Personalise** for English or தமிழ் (Tamil text is marked `lang="ta"`). The choice is available only in gated mode, because Preview
   has no Tamil. A narration that fell back is shown with its reason, for example "Tamil unavailable - showing English (reason: the
   AI text failed the mechanical checks)".
 - **Operator desk.** The Studio view shows the full desk, including the model's token use and each mechanical check. Fan and

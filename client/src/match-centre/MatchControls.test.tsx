@@ -8,12 +8,13 @@ import { speedChoices } from './match-format'
 import { GATED_SPEEDS } from './gate-model'
 
 function setup(overrides: Partial<Parameters<typeof MatchControls>[0]> = {}) {
-  const handlers = { onMode: vi.fn(), onSpeed: vi.fn(), onStart: vi.fn(), onStop: vi.fn(), onJump: vi.fn() }
+  const handlers = { onMode: vi.fn(), onIncremental: vi.fn(), onSpeed: vi.fn(), onStart: vi.fn(), onStop: vi.fn(), onJump: vi.fn() }
   const props: Parameters<typeof MatchControls>[0] = {
     metadata, status: 'idle', clockMs: 0, speed: 60, speedChoice: 60, speeds: speedChoices, message: null, mode: 'preview',
-    gated: { session: null, narration: null, narrationFailed: false }, ...handlers, ...overrides,
+    gated: { session: null, narration: null, narrationFailed: false }, incremental: false, ...handlers, ...overrides,
   }
   const view = render(<MatchControls {...props} />)
+  fireEvent.click(screen.getByText('Playback options & guide'))
   return { ...handlers, view, props }
 }
 
@@ -47,6 +48,17 @@ describe('MatchControls mode switch', () => {
 })
 
 describe('MatchControls in Preview', () => {
+  it('labels causal processing, hides future highlights and requires an explicit start', () => {
+    const { onStart, onIncremental } = setup({ incremental: true })
+    expect(screen.queryByRole('group', { name: 'Jump to a key moment' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('processing-mode')).toHaveTextContent('future goals and review outcomes are unavailable')
+    expect(onStart).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Start live simulation' }))
+    expect(onStart).toHaveBeenCalledWith(0)
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Incremental live simulation' }))
+    expect(onIncremental).toHaveBeenCalledWith(false)
+  })
+
   it('keeps the existing controls and says what the feed is', () => {
     const { onStart, onJump } = setup()
     expect(screen.getByTestId('mode-note')).toHaveTextContent('Preview - deterministic rules only, not operator-approved')
@@ -68,6 +80,15 @@ describe('MatchControls in Preview', () => {
     expect(screen.getByRole('button', { name: 'Kick off' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Stop' })).toBeEnabled()
     expect(screen.getByRole('button', { name: /67:21/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Full-time recap' })).toBeDisabled()
+  })
+
+  it('offers a no-model full-time catch-up only in preview', () => {
+    const { onJump, view, props } = setup()
+    fireEvent.click(screen.getByRole('button', { name: 'Full-time recap' }))
+    expect(onJump).toHaveBeenCalledWith(metadata.durationMs)
+    view.rerender(<MatchControls {...props} mode="gated" />)
+    expect(screen.queryByRole('button', { name: 'Full-time recap' })).not.toBeInTheDocument()
   })
 })
 

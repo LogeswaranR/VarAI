@@ -45,6 +45,15 @@ public sealed class NarrationVerifierTests
     }
 
     [TestMethod]
+    public void ProgressContextDoesNotAuthoriseAnInventedGoal()
+    {
+        foreach (var cue in Timeline.Overlays.Where(cue => cue.Kind is OverlayKinds.SprintCarry or OverlayKinds.HardPass))
+        {
+            Assert.DoesNotContain("goal", Facts(cue).Concepts, cue.OverlayId);
+        }
+    }
+
+    [TestMethod]
     public void Facts_HashChangesWhenAnyFactChanges()
     {
         var first = Facts(Shot);

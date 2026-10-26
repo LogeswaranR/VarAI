@@ -25,7 +25,7 @@ public static class MatchInsightEngine
     private const int CueDelayMs = 800;
     private const int PressTrapWindowMs = 300_000;
 
-    private sealed record PendingCue(
+    internal sealed record PendingCue(
         string Kind,
         int Priority,
         int InMs,
@@ -62,15 +62,20 @@ public static class MatchInsightEngine
         for (var index = 0; index < ordered.Count; index++)
         {
             var cue = ordered[index];
-            var duration = cue.Priority switch { 3 => 9000, 2 => 7000, _ => 5000 };
-            cues.Add(new OverlayCue(
-                OverlaySchemaVersion, $"{SyntheticMatchGenerator.MatchId}-OV-{index + 1:000}", SyntheticMatchGenerator.MatchId,
-                cue.Kind, cue.Priority, cue.InMs, cue.InMs + duration, duration, cue.Headline, cue.Detail, cue.WhyItMatters,
-                new OverlayLowerThird(cue.Title, cue.Subtitle), cue.Metrics, cue.TeamId, cue.PlayerIds, cue.SourceEventIds,
-                cue.SourceWindow, cue.Rule, cue.ScenarioId, true));
+            cues.Add(CreateCue(cue, $"{SyntheticMatchGenerator.MatchId}-OV-{index + 1:000}"));
         }
 
         return new MatchAnalysis(momentum, cues, highlights);
+    }
+
+    internal static OverlayCue CreateCue(PendingCue cue, string id)
+    {
+        var duration = cue.Priority switch { 3 => 9000, 2 => 7000, _ => 5000 };
+        return new OverlayCue(
+            OverlaySchemaVersion, id, SyntheticMatchGenerator.MatchId,
+            cue.Kind, cue.Priority, cue.InMs, cue.InMs + duration, duration, cue.Headline, cue.Detail, cue.WhyItMatters,
+            new OverlayLowerThird(cue.Title, cue.Subtitle), cue.Metrics, cue.TeamId, cue.PlayerIds, cue.SourceEventIds,
+            cue.SourceWindow, cue.Rule, cue.ScenarioId, true);
     }
 
     public static string Clock(int ms) => $"{ms / 60_000}:{ms / 1000 % 60:00}";
@@ -137,7 +142,7 @@ public static class MatchInsightEngine
 
         if (forAfter == againstAfter)
         {
-            return $"Levels the match: {line}. One more goal now decides it.";
+            return $"Levels the match: {line}. The next goal would put its scorer's team ahead.";
         }
 
         return forAfter > againstAfter ? $"Extends the lead: {line}." : $"Cuts the deficit: {line}.";
@@ -146,22 +151,33 @@ public static class MatchInsightEngine
     private static void AddEventCues(
         IReadOnlyList<SyntheticMatchEvent> events, List<PendingCue> pending, List<Highlight> highlights)
     {
-        var score = new Score(0, 0);
-        Score? goalBefore = null;
-        Score? goalAfter = null;
-        var cooldowns = new Dictionary<string, int>(StringComparer.Ordinal);
-        var cautioned = new HashSet<string>(StringComparer.Ordinal);
-        var highTurnovers = new Dictionary<string, List<HighTurnover>>(StringComparer.Ordinal);
-
-        bool CoolingDown(string key, int timeMs, int cooldownMs) =>
-            cooldowns.TryGetValue(key, out var last) && timeMs - last < cooldownMs;
-
-        bool IsAssist(int passIndex) =>
-            passIndex + 2 < events.Count && events[passIndex + 1].EventType == MatchEventTypes.Shot &&
-            events[passIndex + 2].EventType == MatchEventTypes.Goal && events[passIndex + 2].TeamId == events[passIndex].TeamId;
-
+        var interpreter = new EventInterpreter();
         for (var index = 0; index < events.Count; index++)
         {
+            interpreter.Add(events, index, pending, highlights);
+        }
+    }
+
+    internal sealed class EventInterpreter
+    {
+        private Score score = new(0, 0);
+        private Score? goalBefore;
+        private Score? goalAfter;
+        private readonly Dictionary<string, int> cooldowns = new(StringComparer.Ordinal);
+        private readonly HashSet<string> cautioned = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, List<HighTurnover>> highTurnovers = new(StringComparer.Ordinal);
+
+        private bool CoolingDown(string key, int timeMs, int cooldownMs) =>
+            cooldowns.TryGetValue(key, out var last) && timeMs - last < cooldownMs;
+
+        internal void Add(
+            IReadOnlyList<SyntheticMatchEvent> events, int index, List<PendingCue> pending, List<Highlight>? highlights = null)
+        {
+            // Only the replay caller supplies future events. Live callers append one event at a time.
+            bool IsAssist(int passIndex) =>
+                passIndex + 2 < events.Count && events[passIndex + 1].EventType == MatchEventTypes.Shot &&
+                events[passIndex + 2].EventType == MatchEventTypes.Goal && events[passIndex + 2].TeamId == events[passIndex].TeamId;
+
             var item = events[index];
             var before = score;
             if (item.ScoreAfter is not null)
@@ -175,7 +191,10 @@ public static class MatchInsightEngine
                     goalBefore = before;
                     goalAfter = item.ScoreAfter;
                     AddGoalCue(events, index, before, item.ScoreAfter, pending);
-                    AddGoalHighlight(events, index, item.ScoreAfter, highlights);
+                    if (highlights is not null)
+                    {
+                        AddGoalHighlight(events, index, item.ScoreAfter, highlights);
+                    }
                     break;
                 case MatchEventTypes.Review when item.Outcome == "STARTED":
                     AddReviewStartedCue(events, index, goalBefore, goalAfter, pending);
@@ -195,13 +214,13 @@ public static class MatchInsightEngine
                     item.Metrics is { Difficulty: >= HardPassDifficulty, UnderPressure: true, FinalThird: true } &&
                     item.PlayerId is not null && (IsAssist(index) || !CoolingDown($"PASS:{item.TeamId}", item.MatchClockMs, 600_000)):
                     cooldowns[$"PASS:{item.TeamId}"] = item.MatchClockMs;
-                    AddHardPassCue(item, score, pending);
+                    AddHardPassCue(item, score, pending, replay: highlights is not null);
                     break;
                 case MatchEventTypes.Shot when item.Metrics is { SpeedKph: >= ShotSpeedThresholdKph } && item.PlayerId is not null &&
                     !(index + 1 < events.Count && events[index + 1].EventType == MatchEventTypes.Goal) &&
                     !CoolingDown($"SHOT:{item.PlayerId}", item.MatchClockMs, 300_000):
                     cooldowns[$"SHOT:{item.PlayerId}"] = item.MatchClockMs;
-                    AddShotSpeedCue(item, score, pending);
+                    AddShotSpeedCue(item, score, pending, replay: highlights is not null);
                     break;
             }
 
@@ -213,7 +232,7 @@ public static class MatchInsightEngine
                 var tackle = events[index - 1];
                 if (MatchMetrics.Progress(item.TeamId, tackle.X) < 0.5)
                 {
-                    continue;
+                    return;
                 }
 
                 if (!highTurnovers.TryGetValue(item.TeamId, out var list))
@@ -372,11 +391,14 @@ public static class MatchInsightEngine
         var player = SyntheticMatchGenerator.Player(item.PlayerId!);
         var metrics = item.Metrics!;
         var duration = (item.DurationMs ?? 0) / 1000.0;
+        var progress = metrics.ForwardM is > 0
+            ? $"Advances the ball {F(metrics.ForwardM.Value)} m in the attacking direction while carrying it{(metrics.FinalThird == true ? ", finishing in the final third" : string.Empty)}."
+            : "The carry crosses the speed threshold but makes no forward progress in the attacking direction.";
         pending.Add(new PendingCue(
             OverlayKinds.SprintCarry, 1, item.MatchClockMs + (item.DurationMs ?? 0) + CueDelayMs,
             $"{player.Name} powers forward with the ball",
             $"Carry of {F(metrics.DistanceM ?? 0)} m in {F(duration)} s: {F(metrics.SpeedMps ?? 0)} m/s, above the {F(MatchMetrics.SprintThresholdMps)} m/s threshold.",
-            $"Speed threshold crossed: {F(metrics.SpeedMps ?? 0)} m/s (limit {F(MatchMetrics.SprintThresholdMps)} m/s). Score {Scoreline(score)}, {RemainingText(item.MatchClockMs)}.",
+            $"{progress} Carry speed is not total running distance or proof of a scoring chance. Score {Scoreline(score)}, {RemainingText(item.MatchClockMs)}.",
             $"{player.Name.ToUpperInvariant()} · #{player.ShirtNumber}",
             $"Carry {F(metrics.DistanceM ?? 0)} m · {F(metrics.SpeedMps ?? 0)} m/s ({F(metrics.SpeedKph ?? 0, "0")} km/h)",
             [
@@ -388,7 +410,7 @@ public static class MatchInsightEngine
             $"SPRINT_CARRY v1: carry of at least {F(SprintMinimumDistanceM)} m at or above {F(MatchMetrics.SprintThresholdMps)} m/s; one tag per player per 180 s.", null));
     }
 
-    private static void AddHardPassCue(SyntheticMatchEvent item, Score score, List<PendingCue> pending)
+    private static void AddHardPassCue(SyntheticMatchEvent item, Score score, List<PendingCue> pending, bool replay)
     {
         var player = SyntheticMatchGenerator.Player(item.PlayerId!);
         var receiver = item.ReceiverId is null ? null : SyntheticMatchGenerator.Player(item.ReceiverId);
@@ -405,11 +427,14 @@ public static class MatchInsightEngine
         }
 
         var traitText = traits.Count == 0 ? string.Empty : $", {string.Join(", ", traits)}";
+        var progress = metrics.ForwardM is > 0
+            ? $"Retains the ball under pressure and moves it {F(metrics.ForwardM.Value)} m in the attacking direction, finishing in the final third."
+            : "Retains the ball under pressure in the final third, without gaining ground in the attacking direction.";
         pending.Add(new PendingCue(
             OverlayKinds.HardPass, 2, item.MatchClockMs + (item.DurationMs ?? 0) + CueDelayMs,
             receiver is null ? $"{player.Name} completes a difficult pass" : $"{player.Name} completes a difficult pass to {receiver.Name}",
             $"{F(metrics.DistanceM ?? 0)} m pass, {F(metrics.ForwardM ?? 0)} m forward{traitText}: difficulty {metrics.Difficulty}/100.",
-            $"Difficulty {metrics.Difficulty}/100 (heuristic from distance, forward progress, pressure and final-third entry). Score {Scoreline(score)}, {RemainingText(item.MatchClockMs)}.",
+            $"{progress} Difficulty is a heuristic, not a success probability. Score {Scoreline(score)}, {RemainingText(item.MatchClockMs)}.",
             $"{player.Name.ToUpperInvariant()} · #{player.ShirtNumber}", $"Pass difficulty {metrics.Difficulty}/100 · {F(metrics.DistanceM ?? 0)} m",
             [
                 Metric("difficulty", "Pass difficulty", metrics.Difficulty ?? 0, "/100"),
@@ -417,10 +442,10 @@ public static class MatchInsightEngine
                 Metric("forwardProgress", "Forward progress", metrics.ForwardM ?? 0, "m"),
             ],
             item.TeamId, receiver is null ? [player.PlayerId] : [player.PlayerId, receiver.PlayerId], [item.EventId], null,
-            $"HARD_PASS v1: completed pass under pressure into the final third with difficulty of at least {HardPassDifficulty}/100; one cue per team per 600 s, plus any assisting pass.", null));
+            $"HARD_PASS v1: completed pass under pressure into the final third with difficulty of at least {HardPassDifficulty}/100; one cue per team per 600 s{(replay ? ", plus any assisting pass" : "; no future assist information")}.", null));
     }
 
-    private static void AddShotSpeedCue(SyntheticMatchEvent item, Score score, List<PendingCue> pending)
+    private static void AddShotSpeedCue(SyntheticMatchEvent item, Score score, List<PendingCue> pending, bool replay)
     {
         var player = SyntheticMatchGenerator.Player(item.PlayerId!);
         var metrics = item.Metrics!;
@@ -441,7 +466,7 @@ public static class MatchInsightEngine
                 Metric("shotDistance", "Shot distance", metrics.DistanceM ?? 0, "m"),
             ],
             item.TeamId, [player.PlayerId], [item.EventId], null,
-            $"SHOT_SPEED v1: shot at or above {F(ShotSpeedThresholdKph, "0")} km/h that is not immediately followed by a goal; one cue per player per 300 s.", null));
+            $"SHOT_SPEED v1: shot at or above {F(ShotSpeedThresholdKph, "0")} km/h{(replay ? " that is not immediately followed by a goal" : "; subsequent outcomes are not yet known")}; one cue per player per 300 s.", null));
     }
 
     private static void AddPressTrapCue(
@@ -471,86 +496,100 @@ public static class MatchInsightEngine
         var samples = new List<MomentumSample>();
         for (var minute = 1; minute <= SyntheticMatchGenerator.MatchEndMs / 60_000; minute++)
         {
-            var timeMs = minute * 60_000;
-            var windowMs = Math.Min(WindowSeconds * 1000, timeMs);
-            var fromMs = timeMs - windowMs;
-            int homeActions = 0, awayActions = 0, turnovers = 0, homePressures = 0, awayPressures = 0;
-            foreach (var item in events)
-            {
-                if (item.MatchClockMs <= fromMs || item.MatchClockMs > timeMs)
-                {
-                    continue;
-                }
-
-                var home = item.TeamId == SyntheticMatchGenerator.HomeTeamId;
-                switch (item.EventType)
-                {
-                    case MatchEventTypes.Pass or MatchEventTypes.Carry or MatchEventTypes.Shot:
-                        if (home)
-                        {
-                            homeActions++;
-                        }
-                        else
-                        {
-                            awayActions++;
-                        }
-
-                        break;
-                    case MatchEventTypes.PossessionChange:
-                        turnovers++;
-                        break;
-                    case MatchEventTypes.Pressure:
-                        if (home)
-                        {
-                            homePressures++;
-                        }
-                        else
-                        {
-                            awayPressures++;
-                        }
-
-                        break;
-                }
-            }
-
-            var total = homeActions + awayActions;
-            var share = total == 0 ? 50.0 : 100.0 * homeActions / total;
-            var control = (int)Math.Round((share - 50.0) * 2.0, MidpointRounding.AwayFromZero);
-            var perMinute = turnovers / (windowMs / 60_000.0);
-            string state;
-            string? controlling = null;
-            if (perMinute >= ChaosTurnoversPerMinute)
-            {
-                state = "CHAOS";
-            }
-            else if (Math.Abs(control) >= ControlThreshold)
-            {
-                state = "CONTROL";
-                controlling = control > 0 ? SyntheticMatchGenerator.HomeTeamId : SyntheticMatchGenerator.AwayTeamId;
-            }
-            else
-            {
-                state = "BALANCED";
-            }
-
-            samples.Add(new MomentumSample(
-                minute, timeMs, windowMs / 1000, MatchMetrics.Round1(share), control, turnovers,
-                MatchMetrics.Round1(perMinute), homePressures, awayPressures, state, controlling));
+            samples.Add(ComputeMomentumAt(events, minute));
         }
 
         return samples;
     }
 
+    internal static MomentumSample ComputeMomentumAt(IReadOnlyList<SyntheticMatchEvent> events, int minute)
+    {
+        var timeMs = minute * 60_000;
+        var windowMs = Math.Min(WindowSeconds * 1000, timeMs);
+        var fromMs = timeMs - windowMs;
+        int homeActions = 0, awayActions = 0, turnovers = 0, homePressures = 0, awayPressures = 0;
+        foreach (var item in events)
+        {
+            if (item.MatchClockMs <= fromMs || item.MatchClockMs > timeMs)
+            {
+                continue;
+            }
+
+            var home = item.TeamId == SyntheticMatchGenerator.HomeTeamId;
+            switch (item.EventType)
+            {
+                case MatchEventTypes.Pass or MatchEventTypes.Carry or MatchEventTypes.Shot:
+                    if (home)
+                    {
+                        homeActions++;
+                    }
+                    else
+                    {
+                        awayActions++;
+                    }
+
+                    break;
+                case MatchEventTypes.PossessionChange:
+                    turnovers++;
+                    break;
+                case MatchEventTypes.Pressure:
+                    if (home)
+                    {
+                        homePressures++;
+                    }
+                    else
+                    {
+                        awayPressures++;
+                    }
+
+                    break;
+            }
+        }
+
+        var total = homeActions + awayActions;
+        var share = total == 0 ? 50.0 : 100.0 * homeActions / total;
+        var control = (int)Math.Round((share - 50.0) * 2.0, MidpointRounding.AwayFromZero);
+        var perMinute = turnovers / (windowMs / 60_000.0);
+        string state;
+        string? controlling = null;
+        if (perMinute >= ChaosTurnoversPerMinute)
+        {
+            state = "CHAOS";
+        }
+        else if (Math.Abs(control) >= ControlThreshold)
+        {
+            state = "CONTROL";
+            controlling = control > 0 ? SyntheticMatchGenerator.HomeTeamId : SyntheticMatchGenerator.AwayTeamId;
+        }
+        else
+        {
+            state = "BALANCED";
+        }
+
+        return new MomentumSample(
+            minute, timeMs, windowMs / 1000, MatchMetrics.Round1(share), control, turnovers,
+            MatchMetrics.Round1(perMinute), homePressures, awayPressures, state, controlling);
+    }
+
     private static void AddMomentumCues(
         IReadOnlyList<SyntheticMatchEvent> events, IReadOnlyList<MomentumSample> momentum, List<PendingCue> pending)
     {
-        var lastCue = new Dictionary<string, int>(StringComparer.Ordinal);
-        var score = new Score(0, 0);
-        var scoreIndex = 0;
+        var interpreter = new MomentumInterpreter();
         for (var index = 1; index < momentum.Count; index++)
         {
-            var sample = momentum[index];
-            var previous = momentum[index - 1];
+            interpreter.Add(events, momentum[index], momentum[index - 1], pending);
+        }
+    }
+
+    internal sealed class MomentumInterpreter
+    {
+        private readonly Dictionary<string, int> lastCue = new(StringComparer.Ordinal);
+        private Score score = new(0, 0);
+        private int scoreIndex;
+
+        internal void Add(
+            IReadOnlyList<SyntheticMatchEvent> events, MomentumSample sample, MomentumSample previous, List<PendingCue> pending)
+        {
             while (scoreIndex < events.Count && events[scoreIndex].MatchClockMs <= sample.MatchClockMs)
             {
                 score = events[scoreIndex].ScoreAfter ?? score;

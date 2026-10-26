@@ -39,6 +39,7 @@ function Chart({ metadata, samples, goals }: {
           stroke="#ffffff" strokeWidth="1" strokeDasharray="2 3" />
       ))}
       {points && <polyline points={points} fill="none" stroke="#edf4fc" strokeWidth="1.8" strokeLinejoin="round" />}
+      {latest && <circle cx={x(latest.minute)} cy={y(latest.controlIndex)} r="3" fill="#c2f970" />}
     </svg>
   )
 }
@@ -63,13 +64,17 @@ export function MomentumPanel({ metadata, samples, goals, persona }: {
         {latest && <span className={`mc-tag state-${latest.state.toLowerCase()}`} data-testid="momentum-state">{latest.state}</span>}
       </div>
       <p className="mc-rhythm-headline" data-testid="momentum-headline">{headline(metadata, latest)}</p>
-      <div className="mc-gauge" role="img"
-        aria-label={`Share of ball actions in the last ${latest ? Math.round(latest.windowSeconds / 60) : 5} minutes: ${metadata.homeTeam.shortName} ${homeShown} percent, ${metadata.awayTeam.shortName} ${awayShown} percent.`}>
-        <span className="mc-gauge-home" style={{ width: `${homeShare}%` }}>{metadata.homeTeam.shortName} {homeShown}%</span>
-        <span className="mc-gauge-away">{awayShown}% {metadata.awayTeam.shortName}</span>
+      <div className="mc-share-labels" aria-hidden="true">
+        <span>{metadata.homeTeam.shortName} <strong>{latest ? `${homeShown}%` : '—'}</strong></span>
+        <span><strong>{latest ? `${awayShown}%` : '—'}</strong> {metadata.awayTeam.shortName}</span>
       </div>
+      <div className={`mc-gauge${latest ? '' : ' is-waiting'}`} role="img"
+        aria-label={latest ? `Share of ball actions in the last ${Math.round(latest.windowSeconds / 60)} minutes: ${metadata.homeTeam.shortName} ${homeShown} percent, ${metadata.awayTeam.shortName} ${awayShown} percent.` : 'Share of ball actions: waiting for match data.'}>
+        <span className="mc-gauge-home" style={{ width: `${homeShare}%` }} />
+        <span className="mc-gauge-away" />
+      </div>
+      {samples.length > 0 && <Chart metadata={metadata} samples={samples} goals={goals} />}
       {persona === 'analyst' && <>
-        <Chart metadata={metadata} samples={samples} goals={goals} />
         {latest && <dl className="mc-facts">
           <div><dt>Window</dt><dd>{Math.round(latest.windowSeconds / 60)} min to {formatClock(latest.matchClockMs)}</dd></div>
           <div><dt>Control index</dt><dd>{latest.controlIndex > 0 ? '+' : ''}{latest.controlIndex}</dd></div>
@@ -77,9 +82,13 @@ export function MomentumPanel({ metadata, samples, goals, persona }: {
           <div><dt>Pressures</dt><dd>{metadata.homeTeam.shortName} {latest.homePressures} · {metadata.awayTeam.shortName} {latest.awayPressures}</dd></div>
         </dl>}
       </>}
-      <p className="mc-note">
+      <details className="mc-disclosure">
+        <summary>How rhythm is measured</summary>
+        <p className="mc-note">
         Share of ball actions (passes, carries, shots) in a 5-minute window, a possession proxy. Chaos means possession is changing hands unusually often; thresholds are listed on the cues.
-      </p>
+        </p>
+        <p className="mc-note">Chart: home above the centre line, away below. Gold bands mark chaos; dotted lines mark awarded goals, including goals later overturned.</p>
+      </details>
     </section>
   )
 }

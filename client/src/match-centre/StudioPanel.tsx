@@ -7,13 +7,14 @@ import { selectNarration } from './narration-select'
 import { languageNames } from './narration-model'
 import type { NarrationLanguage } from './narration-model'
 
-export function StudioPanel({ metadata, cues, onAirId, clockMs, speed, gated, language }: {
+export function StudioPanel({ metadata, cues, onAirId, clockMs, speed, gated, incremental, language }: {
   readonly metadata: MatchMetadata
   readonly cues: readonly OverlayCue[]
   readonly onAirId: string | null
   readonly clockMs: number
   readonly speed: number
   readonly gated: boolean
+  readonly incremental: boolean
   readonly language: NarrationLanguage
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -38,7 +39,8 @@ export function StudioPanel({ metadata, cues, onAirId, clockMs, speed, gated, la
           This prototype is not connected to a graphics system.
         </p>
         : <p className="mc-note">
-          A rendering partner would consume <code>/api/matches/{MATCH_ID}/overlays?speed=1</code> (schema 1.0, Server-Sent Events). Cues arrive when their match-clock
+          A rendering partner would consume <code>/api/matches/{MATCH_ID}/{incremental ? 'live' : 'overlays'}?speed=1</code>
+          {incremental ? ' and select the overlay messages from the combined incremental feed' : ''} (overlay schema 1.0, Server-Sent Events). Cues arrive when their match-clock
           in-time is reached; at {speed}× each one is also held on air for a few real seconds so it can be read. This prototype is not connected to a graphics system.
           This is the preview feed: deterministic rules only, not operator-approved.
         </p>}

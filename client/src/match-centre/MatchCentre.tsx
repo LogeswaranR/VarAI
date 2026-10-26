@@ -17,6 +17,7 @@ import { useMatchStream } from './useMatchStream'
 import { browserClock } from './useNow'
 import { BroadcastFrame, EVENT_MAP_WINDOW_MS } from './BroadcastFrame'
 import { MatchControls } from './MatchControls'
+import { MatchRecap } from './MatchRecap'
 import { MomentFeed } from './MomentFeed'
 import { MomentumPanel } from './MomentumPanel'
 import { OnAirPanel } from './OnAirPanel'
@@ -42,6 +43,8 @@ export function MatchCentre({
 }: MatchCentreProps) {
   const { state, speed, start, prepare, fail, stop, reset, setMetadata } = useMatchStream(streamClient)
   const [mode, setMode] = useState<PlaybackMode>('preview')
+  const [incremental, setIncremental] = useState(false)
+  const [replayMetadata, setReplayMetadata] = useState<MatchMetadata | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [profile, setProfile] = useState<AudienceProfile>(() => loadProfile(storage))
   const [speedChoice, setSpeedChoice] = useState(60)
@@ -56,7 +59,11 @@ export function MatchCentre({
 
   useEffect(() => {
     const controller = new AbortController()
-    loadMetadata(controller.signal).then(setMetadata, error => {
+    loadMetadata(controller.signal).then(value => {
+      if (controller.signal.aborted) return
+      setReplayMetadata(value)
+      setMetadata(value)
+    }, error => {
       if (!controller.signal.aborted) setLoadError(error instanceof Error ? error.message : 'The match could not be loaded.')
     })
     return () => controller.abort()
@@ -83,13 +90,23 @@ export function MatchCentre({
     resetGated()
     reset()
     setHighlightIds([])
+    setIncremental(false)
+    if (speedChoice === 1) setSpeedChoice(60)
+    if (replayMetadata) setMetadata(replayMetadata)
     setMode(next)
+  }
+  const changeIncremental = (enabled: boolean) => {
+    reset()
+    setHighlightIds([])
+    if (replayMetadata) setMetadata(replayMetadata)
+    setIncremental(enabled)
+    if (!enabled && speedChoice === 1) setSpeedChoice(60)
   }
   const begin = useCallback((fromSeconds: number) => {
     setHighlightIds([])
     if (gated) void startGated({ speed: gatedSpeed, fromSeconds })
-    else start({ speed: speedChoice, fromSeconds })
-  }, [gated, gatedSpeed, speedChoice, start, startGated])
+    else start({ speed: speedChoice, fromSeconds, ...(incremental ? { incremental: true } : {}) })
+  }, [gated, gatedSpeed, speedChoice, start, startGated, incremental])
 
   const recent = useMemo(() => recentEvents(state.events, state.clockMs, EVENT_MAP_WINDOW_MS), [state.events, state.clockMs])
   const highlighted = useMemo(
@@ -101,13 +118,14 @@ export function MatchCentre({
       <header className="mc-hero">
         <p className="mc-eyebrow" data-testid="synthetic-badge">Synthetic match insights · generated, not real data</p>
         <h1>Match centre<span className="mc-dot" aria-hidden="true">.</span></h1>
-        <p className="mc-intro">{introText(mode)}</p>
+        <p className="mc-intro">Watch the play. See the story.</p>
       </header>
       {loadError && <p className="mc-error" role="alert">{loadError}</p>}
       <ProfileBar metadata={metadata} profile={resolved} languageEnabled={gated} onPersona={changePersona} onClub={changeClub}
         onPlayer={changePlayer} onLanguage={changeLanguage} />
       <MatchControls metadata={metadata} status={state.status} clockMs={state.clockMs} speed={speed} message={state.message}
-        speeds={gated ? GATED_SPEEDS : speedChoices} speedChoice={gated ? gatedSpeed : speedChoice} mode={mode}
+        speeds={gated ? GATED_SPEEDS : incremental ? [1, ...speedChoices] : speedChoices} speedChoice={gated ? gatedSpeed : speedChoice} mode={mode}
+        incremental={incremental} onIncremental={changeIncremental}
         gated={{ session: gate.session, narration: gate.narration, narrationFailed: gate.narrationFailed }}
         onMode={changeMode} onSpeed={gated ? setGatedSpeed : setSpeedChoice} onStart={begin} onStop={gated ? stopGated : stop}
         onJump={ms => begin(Math.floor(ms / 1000))} />
@@ -121,26 +139,32 @@ export function MatchCentre({
             <div className="mc-main">
               <BroadcastFrame metadata={metadata} recent={recent} highlighted={highlighted} clockMs={state.clockMs} score={state.score}
                 cue={state.presented} status={state.status} clubId={resolved.clubId} speed={speed} gated={gated} language={language} />
-              <MomentumPanel metadata={metadata} samples={state.momentum} goals={goals} persona={resolved.persona} />
+              {resolved.persona === 'analyst' &&
+                <MomentumPanel metadata={metadata} samples={state.momentum} goals={goals} persona={resolved.persona} />}
             </div>
             <div className="mc-side">
               {resolved.persona === 'studio' && <OnAirPanel cue={state.presented} gated={gated} language={language} />}
               {resolved.persona === 'analyst' && <TeamStatsPanel metadata={metadata} events={state.events} />}
               {resolved.persona !== 'studio' &&
                 <PlayerFocus metadata={metadata} events={state.events} cues={state.overlays} playerId={resolved.playerId} />}
+              {resolved.persona !== 'analyst' &&
+                <MomentumPanel metadata={metadata} samples={state.momentum} goals={goals} persona={resolved.persona} />}
             </div>
           </div>
+          <MatchRecap key={`${mode}-${incremental}-${state.catchUpUntilMs}`} metadata={metadata} state={state} profile={resolved} onHighlight={setHighlightIds} />
           {resolved.persona === 'studio'
             ? <StudioPanel metadata={metadata} cues={state.overlays} onAirId={state.presented?.overlayId ?? null}
-              clockMs={state.clockMs} speed={speed} gated={gated} language={language} />
+              clockMs={state.clockMs} speed={speed} gated={gated} incremental={incremental} language={language} />
             : <MomentFeed metadata={metadata} cues={state.overlays} persona={resolved.persona} clubId={resolved.clubId}
               playerId={resolved.playerId} gated={gated} language={language} onHighlight={setHighlightIds} />}
           {resolved.persona === 'analyst' && <RawFeed metadata={metadata} events={state.events} />}
         </>
         : !loadError && <p className="mc-empty">Loading the synthetic match…</p>}
-      <div className="mc-provenance" data-testid="provenance">
+      <details className="mc-provenance" data-testid="provenance">
+        <summary>About this simulation and its limits</summary>
+        <p>{introText(mode)}</p>
         {provenanceParagraphs(mode, metadata?.seed ?? null, gate.narration).map(text => <p key={text}>{text}</p>)}
-      </div>
+      </details>
     </section>
   )
 }

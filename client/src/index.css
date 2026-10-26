@@ -52,6 +52,12 @@ a:focus-visible { outline: 3px solid #c2f970; outline-offset: 4px; }
   .app-environment { margin-left: auto; font-size: 0.65rem; }
 }
 
+@media (max-width: 600px) {
+  .app-header-match .app-header-inner { padding-block: 0.65rem; }
+  .app-header-match .app-navigation { gap: 0.5rem 0.8rem; }
+  .app-header-match .app-navigation a { font-size: 0.75rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; }
 }
