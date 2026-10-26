@@ -1,0 +1,12 @@
+:root { background: #f3f6fa; color: #193246; font: 1rem/1.55 system-ui, sans-serif; }
+body { margin: 0; }
+.review-room-preview-notice {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1rem clamp(1rem, 3vw, 2.5rem);
+  border-bottom: 2px solid #805000;
+  background: #fff3d6;
+  color: #634000;
+  overflow-wrap: anywhere;
+}
+.review-room-preview-notice p { margin: 0.25rem 0 0; }

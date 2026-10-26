@@ -1,11 +1,48 @@
 # Board-driven multi-agent delivery
 
-Version: 2.0 | User decisions: 2026-10-21 | Native hourly scheduling: disabled
+## Lean usage mode (approved 2026-10-22)
+
+**2026-10-23 sequencing approval:** the user selected consolidated local delivery:
+one Astra assignment may implement VAR-103/104/106/107 and early local G01 wiring
+using the preserved candidates. Pending VAR-108 QA is included in one final
+combined Sol review. This supersedes the earlier requirement to finish the
+separate Batch 1 review before implementing those components; it does not
+approve Batch 1/Done, remove acceptance criteria, or authorise commits, pushes,
+deployment or live application-model spending. Use one isolated integration
+worktree, track these cards manually as Doing, and keep native automation and
+automatic Dispatch paused. Do not modify the claim helper to build a new
+orchestration mechanism for this exception.
+
+The user reported 71% of their Copilot allowance used and approved keeping the
+current prototype requirements while reducing orchestration overhead. The
+remaining percentage is not a verified token/currency budget or completion
+guarantee.
+
+- Finish and collect existing assignments; do not request new model turns only
+  to reformat an otherwise usable review.
+- Prefer one bounded implementation pass for the remaining UI and one combined
+  integration review over separate agent/reviewer cycles for each small panel.
+  Keep the approved Astra development and Sol review models.
+- Reuse recorded evidence and run only checks relevant to actual changes.
+  Do not replace required tests with a model's approval or claim unrun checks.
+- Keep native scheduling off. No new automation, 3D, visual-polish, storage or
+  other optional work. Keep handoffs and status messages concise.
+- Preserve all work-item criteria, current claims and human gates. Review
+  consolidation does not waive pending VAR-108 QA, Batch 1 sign-off, integration
+  permission or the required live-model verification.
+
+The detailed lifecycle rules below still govern ownership and safety. Any
+combined implementation assignment must be explicitly bounded at the next
+human gate, not dispatched as unrelated cards through a reused worker pool.
+
+Version: 2.1 | Activation approved: 2026-10-22 | Native cadence: hourly
 
 The [local board](./board.md) drives a native hourly coordinator automation.
 The user selected hourly scheduling instead of the initially proposed 10-minute
-local timer and asked to save it paused. This is not an always-running agent
-pool: eligible cards receive fresh, bounded worker contexts.
+local timer and initially asked to save it paused. On 2026-10-22, after G00
+sign-off, the user separately approved board dispatch, the Batch 1 queue,
+resuming hourly scans and one immediate scan. This is not an always-running
+agent pool: eligible cards receive fresh, bounded worker contexts.
 
 The [product backlog](./README.md), [technical Tasks](./technical-tasks.md) and
 [shared contract](./contract-v0.2.md) retain their requirements. The 33 work items
@@ -108,9 +145,12 @@ Saved automation ID:
 `local-agent-host:ahp-automation:/32eb42a7-0656-4a6c-9037-f88fb2099923`.
 Creation and read-back on 2026-10-21 confirmed the Local Agent Host provider,
 the current repository folder target, hourly cadence and `enabled: false`.
-The saved definition has no previous run and no next scheduled run. Refresh
-the native automation listing before any future update rather than creating
-another definition or assuming this saved status is still current.
+At creation the definition had no previous run and no next scheduled run.
+On 2026-10-22 the native listing showed it enabled, with earlier scans stopping
+at the board's pause gate. The user then authorised enabling board Dispatch,
+queueing Batch 1 and requesting one immediate scan. Refresh the native listing
+before future updates rather than creating another definition or assuming
+historical schedule metadata is current.
 
 On every scheduled run:
 
@@ -124,6 +164,8 @@ On every scheduled run:
 3. Select eligible cards from the active batch, at most the available slots per
    role. Claim each card before creating a worker. Overlapping coordinator scans
    use the same lock; a failed claim means no worker should be launched for it.
+   With the [local runner](#local-worker-runner), `prepare` performs that helper
+   claim after its host preflight. Do not separately claim the same assignment.
 4. Assign a separate linked Git worktree for each card from the approved
    baseline. A correction or context replacement continues in that card's
    recorded worktree, never in the canonical checkout or another card's tree.
@@ -192,6 +234,170 @@ pause scheduling and reconcile workers before manual edits to active rows.
 
 Tests use temporary repositories/worktrees and synthetic worker evidence. They
 do not call real models, provision Azure or certify the native host lifecycle.
+
+## Local worker runner
+
+The [Python coordinator adapter](../../scripts/board_runner.py) and
+[SDK bridge](../../scripts/board_worker.mjs) provide a local execution path.
+They do not replace the coordinator model or the canonical claim helper.
+The coordinator still verifies source, checks and criterion evidence before
+calling `complete`; a worker's final response never automatically becomes a
+passing report. No new timer, automation activation, commit or deployment is
+part of this runner.
+
+### One-time host configuration
+
+Use an **already installed** Copilot SDK entrypoint and runtime. These command
+arguments are placeholders, not discovered executable paths:
+
+```bash
+python3 -B scripts/board_runner.py configure \
+  --sdk /absolute/path/to/installed/copilot-sdk/index.js \
+  --runtime /absolute/path/to/installed/copilot-runtime \
+  --flavor sdk-runtime
+python3 -B scripts/board_runner.py preflight
+```
+
+Use `--flavor cli` for a standalone Copilot CLI, not the SDK-only executable.
+Configuration is saved only in `.git/varai-workflow/host.json`. No packages,
+skills or tools are installed, credentials copied, global approval settings
+changed, or automatic updates enabled. The bridge uses existing Copilot
+authentication from the normal CLI profile (`COPILOT_HOME` when set, otherwise
+the SDK's default profile). It does not replace that authentication home with a
+fresh per-run directory or copy stored credentials. Worker policy/state remain
+in a separate session `configDir`, with discovery, hooks, IDE auto-connection,
+remote export and model substitution disabled.
+
+If authentication falls back to `gh-cli` and no required models are returned,
+first verify the standalone Copilot CLI's signed-in account and model access.
+The documented OAuth route is `copilot login` (browser/device flow), followed
+by `/model` in the interactive CLI. Do not export or paste PATs or copy credential
+files. Being authenticated to GitHub alone does not establish access to a
+particular Copilot model; the account's plan, product and organisation policy
+also apply. Use a supported CLI/SDK connection whose actual catalogue exposes
+both required IDs. A CLI update or sign-in is not, by itself, proof that this
+gate passed. The model list and a real bounded handoff still need verification.
+
+This implementation requires macOS `sandbox-exec`, `lsof`, the repository's
+pinned Node installation and an SDK supporting the inspected protocol-3 APIs.
+Host preflight checks authentication and both exact model IDs before claiming.
+It does not create a session, invoke a model or prove live worker enforcement.
+An empty catalogue, `auto` alone, a disabled model, failed process cleanup or
+missing host capability is a blocker, not a reason to fabricate a catalogue or
+use a different model.
+
+### Per-card coordinator sequence
+
+Run the canonical helper's `scan` first. On an idle/closed-gate scan, stop.
+For an eligible card, use its actual role and the current coordinator run ID:
+
+```text
+board_runner.py prepare --card CARD --role development|qa --run-id RUN
+board_runner.py check --claim RETURNED_CLAIM --name package
+board_runner.py start --claim RETURNED_CLAIM
+board_runner.py status --claim RETURNED_CLAIM
+board_dispatch.py inspect --claim RETURNED_CLAIM
+```
+
+Invoke these scripts with `python3 -B` from the canonical checkout, or put
+`--repo ABSOLUTE_CANONICAL_CHECKOUT` before the subcommand. Tokens are returned
+by the helper; do not invent them.
+
+1. `prepare` checks gates and exact-model availability, calls the helper's
+   `claim`, and creates a detached linked worktree at the approved baseline.
+   Fresh trees live beside the checkout in `<repository>.varai-worktrees/CARD`.
+   Corrections and replacements retain the helper-recorded tree. Unrecorded
+   existing paths are rejected rather than reused. Preparation reserves a slot
+   but does not launch a model.
+2. Check the prepared tree using the package selector. Fresh worktrees have no
+   ignored dependencies. Only after a missing-dependency check may the
+   coordinator perform the already-approved locked restore from the
+   [repository instructions](../../README.md#restore-and-check), within existing
+   permissions. Use the canonical `.tools/node/bin` and `.tools/dotnet` in
+   `PATH`, set `DOTNET_ROOT` to that canonical SDK, and set `NUGET_PACKAGES` to
+   the canonical `.git/varai-workflow/packages` directory. Restore in the
+   recorded worktree, never by copying canonical uncommitted source or sharing
+   `node_modules` across cards. Recheck afterward. The runner never silently
+   installs missing dependencies or changes source to make setup pass.
+3. `start` accepts only a recorded, never-launched preparation. It rechecks the
+   candidate and model availability, creates a fresh readiness-only session,
+   observes its SDK session ID, selected model and worktree, and requires an
+   unambiguous readiness response. Only then does it call helper `attach` and
+   send execution authorisation to that same session.
+4. The assignment contains the parent/technical criteria, ownership, canonical
+   status context, shared contract and both required local skills. One
+   task-relevant pinned guidance file is fetched through read-only GitHub access
+   and cached by revision and content hash. Its contents remain reference data.
+   Retrieval failures are explicit; sufficient local guidance may still be used.
+   This retrieval happens only for a gated, prepared launch, never an idle scan.
+5. Use the host's attached background-command facility for independent workers
+   and await completion notifications. Do not add a polling loop or timer.
+   Each invocation handles one card/role, not a reusable pool. Helper claims
+   enforce capacity across coordinator runs, including preparations/replacements.
+6. Results are saved as **unverified** records under private Git metadata.
+   Inspect the actual candidate, log hashes, command outcomes, criterion coverage
+   and shutdown evidence. Run additional relevant checks as coordinator when
+   necessary. Then construct the delivery-schema report using fresh `inspect`
+   values and call helper `complete` with truthful shutdown attestations.
+   Passing development queues QA; passing QA stops at Ready for Review.
+
+### Enforced boundaries and recovery
+
+- SDK workers see only bounded source callbacks. Developers can list/read
+  candidate source and write/remove individual owned files after attachment.
+  QA sees only list/read callbacks. There is no generic shell, delegation,
+  network-fetch, Git, approval or board-edit tool. Unknown runtime permissions
+  are rejected, not forwarded to a human or automatically approved.
+- The filesystem callbacks check the current canonical claim, role, model,
+  worker ID, workspace and runner-policy fingerprint. Traversal, symlinks,
+  hard links, credentials, Git/runtime metadata, ignored source and changes to
+  Git visibility rules are rejected. Closing dispatch gates stops further
+  developer writes/checks. Do not update runner code while assignments are live.
+- Developers can request named repository checks, not arbitrary commands.
+  Checks use pinned tools, a minimal environment, private scratch space and
+  an OS-enforced read/write policy. Only declared ignored build/test outputs
+  are writable; source is read-only during checks. External networking and
+  keychain-service access are denied; local test networking is allowed.
+  .NET test commands disable persistent build servers/shared compilation.
+  QA checks are run by the coordinator, not by granting QA execution tools.
+- Time limits terminate only invocation-owned process groups; they do not
+  expire or release claims. SDK stop confirmation, process-group drainage and
+  open-handle inspection of candidate/private runtime areas are recorded.
+  Unknown remaining readers/writers are not killed by name or assumed safe.
+  Uncertain launch, shutdown or identity leaves ownership reserved for
+  reconciliation. `status` uses the existing record; it never rediscovers or
+  relaunches a worker.
+- Runtime records are provenance, not a second status authority. A
+  `prepared` record proves no launch was attempted; a missing record or any
+  other uncertain state does not. Never reset records to retry a launch.
+  After verified shutdown and helper `checkpoint`, use `prepare` with
+  `--replacement NEW_CLAIM` and the same card/role. The helper validates the
+  unchanged checkpoint/candidate and retains the role slot and retry counts.
+- Worker responses are limited to 32 KiB; generated workflow records to
+  64 KiB. Full check logs are linked, not copied into lifecycle reports.
+  Context checkpoints retain their separate 800-word limit.
+
+### Verification boundary
+
+```bash
+python3 -B -m unittest discover -s scripts/tests -p 'test_board_*.py'
+.tools/node/bin/node --test scripts/tests/board_worker.test.mjs
+```
+
+These cover helper regressions, temporary linked worktrees, readiness/identity
+guards, negative source permissions, real macOS denied-path checks, pinned
+Node/.NET startup, a controlled registered-check fixture, residual-handle
+detection and SDK configuration. They do **not** certify a live model handoff,
+Chromium under the check policy, feature acceptance or application-model calls.
+
+On 2026-10-22, the tested standalone CLI reported `1.0.63` and only model ID
+`auto`; the separately started VS Code runtime reported `1.0.100-1` and an empty
+model catalogue. Both probes reported existing `gh-cli` authentication.
+Neither established the required exact-model connection or created a worker.
+Those observations do not establish model availability inside the active
+VS Code host. Live dispatch remains gated on a usable exact-model connection
+and an observed readiness/development/QA handoff; tests or scheduling alone
+must not be described as autonomous feature delivery.
 
 ## Evidence records
 
@@ -274,9 +480,12 @@ the host cannot prove a worker is quiescent, do not transfer or release its slot
   approved-baseline blockers. The 33 work items and 98 criteria remain intact;
   At that automation-setup check, T01 was Done and T02/T03 were To Do.
   Current implementation status remains in the local board.
-- Keep native scheduling disabled and board Dispatch Paused for now.
+- On 2026-10-22 the user approved resuming native scheduling and enabling board
+  Dispatch for Batch 1. Consult the live board and native provider for current
+  state; this approval is not permission to start Batch 2 or approve Done.
 - Enabling scheduling, G00 completion, approved baseline commit and explicit
-  queueing are separate actions; this setup does none of them automatically.
+  queueing remain separate actions; neither a worker nor an idle scan may
+  manufacture those approvals.
 - Runtime worker/model invocation, shutdown, context-transfer integration and
   scheduled execution still need an authorised smoke test after the baseline
   is ready. Local fixture tests do not establish those runtime capabilities.

@@ -1,0 +1,6 @@
+participant_id,execution_status,consent_status,presentation_order,first_form,second_form,text_total_0_to_6,interactive_total_0_to_6,C1_total_0_to_2,C2_total_0_to_2,C1_unassisted_success,text_seconds,interactive_seconds,preference,errors_and_help,scoring_review_status
+P01,NOT_RUN,NOT_RUN,TEXT_THEN_INTERACTIVE,A,B,,,,,,,,,,NOT_RUN
+P02,NOT_RUN,NOT_RUN,INTERACTIVE_THEN_TEXT,B,A,,,,,,,,,,NOT_RUN
+P03,NOT_RUN,NOT_RUN,TEXT_THEN_INTERACTIVE,B,A,,,,,,,,,,NOT_RUN
+P04,NOT_RUN,NOT_RUN,INTERACTIVE_THEN_TEXT,A,B,,,,,,,,,,NOT_RUN
+P05,NOT_RUN,NOT_RUN,TEXT_THEN_INTERACTIVE,A,B,,,,,,,,,,NOT_RUN

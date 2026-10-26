@@ -1,0 +1,24 @@
+# Allow-list: only what the image build reads is sent to the builder (smaller, faster and no accidental secrets).
+**
+!package.json
+!package-lock.json
+!.npmrc
+!global.json
+!Directory.Build.props
+!NuGet.Config
+!client
+!contracts
+!tests/contract-stubs
+!server
+
+# Exclusions inside the allowed folders (later rules win).
+**/node_modules
+**/bin
+**/obj
+client/dist
+client/test-results
+client/playwright-report
+server/.env
+server/.env.*
+server/appsettings.Local.json
+**/.DS_Store

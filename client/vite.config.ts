@@ -10,8 +10,9 @@ export default defineConfig({
     hmr: process.env.PLAYWRIGHT_TEST === '1' ? false : undefined,
     watch: process.env.PLAYWRIGHT_TEST === '1' ? null : undefined,
     proxy: {
-      '/health': 'http://127.0.0.1:5074',
-      '/api': 'http://127.0.0.1:5074',
+      '/health': process.env.VARAI_API_ORIGIN ?? 'http://127.0.0.1:5074',
+      '/api': process.env.VARAI_API_ORIGIN ?? 'http://127.0.0.1:5074',
+      '/graphql': process.env.VARAI_API_ORIGIN ?? 'http://127.0.0.1:5074',
     },
   },
   test: {

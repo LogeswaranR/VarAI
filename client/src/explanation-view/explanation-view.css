@@ -1,0 +1,21 @@
+.reader-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.reader-controls label { color: var(--rr-muted); font-size: 0.72rem; font-weight: 650; }
+.source-mode-badge { padding: 0.75rem; border: 1px solid #445d35; background: #1c2b1c; color: #d2e9c2; border-radius: 0.55rem; font-size: 0.72rem; }
+.source-mode-badge[data-mode="LIVE_AI"] { border-color: #506d90; background: #192b42; color: #c3d9f6; }
+.review-room .reader-generate { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; min-height: 3rem; padding: 0.8rem 1rem; }
+.reader-generate svg { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+.review-room .reader-hint { margin: 1rem 0 0; padding: 1.5rem 1rem; border: 1px dashed #4d6178; border-radius: 0.6rem; background: var(--rr-inset); color: var(--rr-muted); font-size: 0.8rem; text-align: center; }
+.explanation-reader [role="status"] { font-size: 0.8rem; }
+.explanation-result { padding-top: 0.8rem; }
+.explanation-result > h3 { margin-top: 1rem; font-size: 1.25rem; line-height: 1.4; letter-spacing: -0.035em; }
+.explanation-status { padding: 0.5rem 0.75rem; border-left: 3px solid #c2f970; background: #1b2c1b; color: #d2e9c2; font-size: 0.7rem; font-weight: 650; }
+.explanation-result[data-status="LIMITED"] .explanation-status { border-color: #ffd791; background: #302819; color: #ffe2ae; }
+.explanation-result > ol { padding-left: 1.3rem; }
+.explanation-result > ol > li { padding: 0.25rem 0 0.75rem 0.2rem; margin-top: 0.5rem; border-bottom: 1px solid var(--rr-border); font-size: 0.85rem; }
+.explanation-result > ol > li::marker { color: #c2f970; font-size: 0.75rem; font-weight: 700; }
+.explanation-result > ul, .explanation-result > small { color: var(--rr-muted); font-size: 0.72rem; }
+.explanation-result > ul > li + li { margin-top: 0.5rem; }
+.explanation-recap { border: 1px solid #486438; border-left: 3px solid #c2f970; border-radius: 0.55rem; background: #1a2a1d; padding: 1rem; margin: 1.25rem 0; font-size: 0.85rem; }
+.explanation-recap h3 { margin-top: 0; color: #d2f5a4; }
+.review-room .claim-sources { display: block; width: fit-content; min-height: 2.75rem; padding: 0.5rem 0.65rem; background: #142438; border-color: #6083ab; color: #c1dbfc; font-size: 0.65rem; font-weight: 500; text-align: left; overflow-wrap: anywhere; }
+@media (min-width: 40rem) and (max-width: 64rem) { .reader-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

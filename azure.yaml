@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: varai
+metadata:
+  template: varai@0.1.0
+
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+services:
+  web:
+    project: .
+    host: containerapp
+    language: docker
+    docker:
+      path: ./Dockerfile
+      context: .
+      remoteBuild: true
+
+hooks:
+  predown:
+    posix:
+      shell: sh
+      run: ./infra/hooks/predown.sh
+      continueOnError: true

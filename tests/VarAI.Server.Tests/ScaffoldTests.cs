@@ -23,7 +23,7 @@ public sealed class ScaffoldTests
     }
 
     [TestMethod]
-    public async Task HealthReportsOnlyScaffoldReadiness()
+    public async Task HealthReportsLocalReviewAndContractVersionNotLiveReadiness()
     {
         using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
@@ -34,8 +34,9 @@ public sealed class ScaffoldTests
 
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.CancellationToken);
         Assert.AreEqual("ok", body.GetProperty("status").GetString());
-        Assert.AreEqual("scaffold-only", body.GetProperty("stage").GetString());
-        Assert.HasCount(2, body.EnumerateObject().ToArray());
+        Assert.AreEqual("local-review", body.GetProperty("stage").GetString());
+        Assert.AreEqual("0.2", body.GetProperty("schemaVersion").GetString());
+        Assert.HasCount(3, body.EnumerateObject().ToArray());
     }
 
     [TestMethod]

@@ -14,7 +14,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="VarAI.Server.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="Contracts\VarAI.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="16.6.9" />
   </ItemGroup>
 
   <Target Name="RequireClientBuildForPublish" BeforeTargets="PrepareForPublish">

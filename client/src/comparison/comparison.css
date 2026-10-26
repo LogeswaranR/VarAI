@@ -1,0 +1,10 @@
+.comparison { color: var(--rr-muted); font-size: 0.8rem; }
+.comparison h3, .comparison strong { color: var(--rr-text); }
+.comparison-variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; margin: 1rem 0; }
+.comparison-variants section { padding: 1rem; border: 1px solid #4d6178; border-radius: 0.55rem; background: var(--rr-inset); font-size: 0.75rem; }
+.comparison-variants h3 { margin: 0 0 1rem; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.comparison-variants p:last-child { margin-bottom: 0; }
+.comparison-variants .comparison-current { background: #1c2d1d; border-color: #8bb855; }
+.comparison-current h3 { color: #d2f5a4; }
+.review-room .comparison > button { width: 100%; margin-top: 0.5rem; border-color: #91b95d; background: #22341f; color: #d2f5a4; }
+@media (max-width: 28rem) { .comparison-variants { grid-template-columns: minmax(0, 1fr); } }
